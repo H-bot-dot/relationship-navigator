@@ -2,6 +2,7 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>二階段關係定位工具</title>
 <style>
 /* 1. 定義全局變數  */
@@ -153,6 +154,26 @@ body {
   cursor: pointer; margin-top: 16px; transition: background .2s ease;
 }
 .reset-btn:hover { background: #f8f9fa; }
+
+/* 修改2：新增的手機版專屬優化CSS */
+@media (max-width: 600px) {
+  .wrap { padding: 1rem; } /* 減少邊距，讓卡片更佔滿畫面 */
+  .q-opts { flex-direction: column; } /* 手機上選項改為直向排列 */
+  .q-btn { width: 100%; padding: 12px; font-size: 14px; text-align: center; } /* 按鈕放大，方便手指點擊 */
+  
+  /* 讓矩陣圖在手機上可以左右滑動，不被擠壓 */
+  .matrix-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 10px;
+    margin: 0 -1rem; /* 讓邊緣貼齊螢幕 */
+    padding: 0 1rem;
+  }
+  .matrix-label-row, .matrix-row {
+    min-width: 500px; /* 強制矩陣圖保持一定寬度，超出的部分用滑動的 */
+  }
+  .result-box { padding: 1.25rem; } /* 結果框在手機上稍微縮小內距 */
+}
 </style>
 </head>
 <body>
@@ -199,7 +220,7 @@ body {
       </div>
     </div>
     <div id="phase1-next" style="display:none;margin-top:6px">
-      <button class="q-btn sel" style="padding:10px 24px;font-size:14px" onclick="goPhase2()">進入精確定位 →</button>
+      <button class="q-btn sel" style="padding:10px 24px;font-size:14px; width:100%;" onclick="goPhase2()">進入精確定位 →</button>
     </div>
   </div>
 
@@ -266,7 +287,6 @@ body {
   <div id="phase3" style="display:none"></div>
 
 </div>
-
 <script>
 const st = {power:null, goal:null, role:null, prox:null, trust:null};
 
@@ -295,10 +315,14 @@ function goPhase2() {
   bar.innerHTML = `收縮結果：<span>${CTX.power[st.power]}</span> · <span>${CTX.goal[st.goal]}</span> · <span>${CTX.role[st.role]}</span>`;
 }
 
+// 【修改點 1】：點擊矩陣時不再隱藏 phase2，保持矩陣在畫面上
 function pickCell(prox, trust, el) {
   document.querySelectorAll('.cell').forEach(c=>c.classList.remove('active'));
   el.classList.add('active');
   st.prox = prox; st.trust = trust;
+  
+  // (已刪除隱藏 phase2 的程式碼)
+  
   document.getElementById('pd2').classList.remove('active'); document.getElementById('pd2').classList.add('done');
   document.getElementById('pl2').classList.remove('active');
   document.getElementById('pd3').classList.add('active');
@@ -371,18 +395,31 @@ function renderResult() {
       ${conflicts.length?`<div class="divider"></div><div class="section-label">衝突訊號</div>${conflicts.map(c=>`<div style="font-size:13px;color:#9d7005;background:#fdfaf0;border:1px solid #ffeeba;border-radius:var(--border-radius-md);padding:10px 12px;margin-bottom:8px">${c.msg}</div>`).join('')}`:''}
       
       <button class="ask-btn" id="deep-ask">針對這個組合，給我一個具體的對話腳本 ↗</button>
-      <button class="reset-btn" onclick="resetAll()">重新定位</button>
+      
+      <div style="display:flex; gap:10px; margin-top:16px;">
+        <button class="reset-btn" style="flex:1; margin-top:0;" onclick="document.getElementById('phase2').scrollIntoView({behavior:'smooth', block:'start'})">↑ 修改矩陣</button>
+        <button class="reset-btn" style="flex:1; margin-top:0;" onclick="resetAll()">⟲ 全部重新定位</button>
+      </div>
     </div>`;
 
   document.getElementById('deep-ask').onclick = ()=>{
-    // 這裡原本的 sendPrompt 函數在你的程式碼中沒有定義，我保留原樣
-    // 如果你有串接自己的對話視窗，請確保 sendPrompt 存在
-    if(typeof sendPrompt === 'function') {
-        sendPrompt(`根據以下關係定性，給我一個具體的對話腳本：權力=${CTX.power[st.power]}、目標=${CTX.goal[st.goal]}、邊界=${CTX.role[st.role]}、親疏=${proxLabel}、信任=${trustLabel}。包括開場白、核心訴求的包裝方式，以及如何應對對方可能的抗拒。`);
+    const promptText = `根據以下關係定性，給我一個具體的對話腳本：權力=${CTX.power[st.power]}、目標=${CTX.goal[st.goal]}、邊界=${CTX.role[st.role]}、親疏=${proxLabel}、信任=${trustLabel}。包括開場白、核心訴求的包裝方式，以及如何應對對方可能的抗拒。`;
+    
+    if(navigator.clipboard) {
+      navigator.clipboard.writeText(promptText).then(() => {
+        alert("✅ 已經成功複製 AI 提示詞！\n\n現在你可以直接去貼給 ChatGPT 或 Claude 了。\n\n(提示詞內容：\n" + promptText + ")");
+      }).catch(err => {
+        prompt("請手動複製以下提示詞：", promptText);
+      });
     } else {
-        alert("已產生 prompt，但找不到 sendPrompt 函數來發送。");
+      prompt("請手動複製以下提示詞：", promptText);
     }
   };
+
+  // 【修改點 3】：魔法在這裡！延遲一點點時間（等畫面渲染完），自動平滑向下滾動到結果區塊
+  setTimeout(() => {
+    p3.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 50);
 }
 
 function resetAll() {
@@ -400,8 +437,9 @@ function resetAll() {
   document.getElementById('phase1-next').style.display='none';
   document.querySelectorAll('.q-btn').forEach(b=>b.classList.remove('sel'));
   document.querySelectorAll('.cell').forEach(c=>c.classList.remove('active'));
+  // 重新定位時，自動捲動回最上方
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 </script>
-
 </body>
 </html>
