@@ -19,7 +19,7 @@ A lightweight, interactive web tool designed to help users analyze relationship 
 This tool is entirely client-side. No build tools, frameworks, or backend servers are required.
 
 1.  Clone or download this repository.
-2.  Simply open the `index.html` file in any modern web browser (Chrome, Firefox, Safari, Edge).
+2.  Simply open the `navigator.html` file in any modern web browser (Chrome, Firefox, Safari, Edge).
 
 ## 🛠️ Tech Stack
 
@@ -29,7 +29,7 @@ This tool is entirely client-side. No build tools, frameworks, or backend server
 
 ## ⚙️ Customization
 
-If you want to modify the strategies or add new rules, you can easily edit the `STRATS` and `CONFLICT_CHECKS` objects directly inside the `<script>` tag of the `index.html` file. 
+If you want to modify the strategies or add new rules, you can easily edit the `STRATS` and `CONFLICT_CHECKS` objects directly inside the `<script>` tag of the `navigator.html` file. 
 
 * `STRATS`: Contains the arrays for `add` (Do's) and `avoid` (Don'ts) for every dimension and matrix cell.
 * `CONFLICT_CHECKS`: Contains the logical rules for triggering warning messages when incompatible relationship dynamics are selected.
