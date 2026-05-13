@@ -387,12 +387,35 @@ function renderResult() {
     </div>`;
 
   // 【V2 Feature】: Copy AI prompt to clipboard
+  // 【V2 Feature】: Copy AI prompt to clipboard (Upgraded Contextual Prompt)
   document.getElementById('deep-ask').onclick = ()=>{
-    const promptText = `Based on the following relationship dynamics, give me a specific dialogue script: Power=${CTX.power[st.power]}, Goal=${CTX.goal[st.goal]}, Boundary=${CTX.role[st.role]}, Proximity=${proxLabel}, Trust=${trustLabel}. Include an opening, how to package the core request, and how to handle potential resistance.`;
+    // Convert Sets to strings for the prompt
+    const addStr = [...adds].join(', ');
+    const avoidStr = [...avoids].join(', ');
+
+    const promptText = `I am preparing for an important workplace/interpersonal conversation. I have analyzed our current underlying "relationship dynamics" and "strategic direction" using a framework. Here is the result:
+
+[Relationship Dynamics]
+- Power: ${CTX.power[st.power]}
+- Goal: ${CTX.goal[st.goal]}
+- Boundary: ${CTX.role[st.role]}
+- Proximity: ${proxLabel}
+- Trust: ${trustLabel}
+
+[Core Strategy & Communication Mechanics]
+- Core Insight: ${ms.core}
+- Optional Mechanics (Recommended: please select the 2-3 most suitable ones based on the specific context): ${addStr}
+- Red Lines (Mechanics to strictly avoid): ${avoidStr}
+
+To help you write the most precise, ready-to-use dialogue script for me, please ASK ME these 2 questions first:
+1. Who is the person I am talking to? (e.g., my direct manager, a colleague in another department, a client)
+2. What is the specific event or goal of this conversation? (e.g., declining an unreasonable task, asking for budget, breaking the ice)
+
+Please ONLY ask me these two questions for now. Once I answer, please "strictly adhere" to the [Core Strategy & Communication Mechanics] outlined above to generate a specific dialogue script that includes: an opening, how to frame my core request, and how to handle their potential resistance.`;
     
     if(navigator.clipboard) {
       navigator.clipboard.writeText(promptText).then(() => {
-        alert("✅ AI prompt successfully copied!\n\nYou can now paste it directly into ChatGPT or Claude.\n\n(Prompt content:\n" + promptText + ")");
+        alert("✅ AI prompt successfully copied!\n\nYou can now paste it directly into ChatGPT or Claude.\n\n(The prompt now includes the specific strategies and red lines generated for you!)");
       }).catch(err => {
         prompt("Please manually copy the following prompt:", promptText);
       });
