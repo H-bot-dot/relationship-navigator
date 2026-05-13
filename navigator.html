@@ -295,10 +295,12 @@ function goPhase2() {
   bar.innerHTML = `Narrow-down Result: <span>${CTX.power[st.power]}</span> · <span>${CTX.goal[st.goal]}</span> · <span>${CTX.role[st.role]}</span>`;
 }
 
+// 【V2 Feature】: Keep matrix visible on click
 function pickCell(prox, trust, el) {
   document.querySelectorAll('.cell').forEach(c=>c.classList.remove('active'));
   el.classList.add('active');
   st.prox = prox; st.trust = trust;
+  
   document.getElementById('pd2').classList.remove('active'); document.getElementById('pd2').classList.add('done');
   document.getElementById('pl2').classList.remove('active');
   document.getElementById('pd3').classList.add('active');
@@ -371,16 +373,32 @@ function renderResult() {
       ${conflicts.length?`<div class="divider"></div><div class="section-label">Conflict Signals</div>${conflicts.map(c=>`<div style="font-size:13px;color:#9d7005;background:#fdfaf0;border:1px solid #ffeeba;border-radius:var(--border-radius-md);padding:10px 12px;margin-bottom:8px">${c.msg}</div>`).join('')}`:''}
       
       <button class="ask-btn" id="deep-ask">Generate a specific dialogue script for this combination ↗</button>
-      <button class="reset-btn" onclick="resetAll()">Reset Navigator</button>
+      
+      <div style="display:flex; gap:10px; margin-top:16px;">
+        <button class="reset-btn" style="flex:1; margin-top:0;" onclick="document.getElementById('phase2').scrollIntoView({behavior:'smooth', block:'start'})">↑ Modify Matrix</button>
+        <button class="reset-btn" style="flex:1; margin-top:0;" onclick="resetAll()">⟲ Reset All</button>
+      </div>
     </div>`;
 
+  // 【V2 Feature】: Copy AI prompt to clipboard
   document.getElementById('deep-ask').onclick = ()=>{
-    if(typeof sendPrompt === 'function') {
-        sendPrompt(`Based on the following relationship dynamics, give me a specific dialogue script: Power=${CTX.power[st.power]}, Goal=${CTX.goal[st.goal]}, Boundary=${CTX.role[st.role]}, Proximity=${proxLabel}, Trust=${trustLabel}. Include an opening, how to package the core request, and how to handle potential resistance.`);
+    const promptText = `Based on the following relationship dynamics, give me a specific dialogue script: Power=${CTX.power[st.power]}, Goal=${CTX.goal[st.goal]}, Boundary=${CTX.role[st.role]}, Proximity=${proxLabel}, Trust=${trustLabel}. Include an opening, how to package the core request, and how to handle potential resistance.`;
+    
+    if(navigator.clipboard) {
+      navigator.clipboard.writeText(promptText).then(() => {
+        alert("✅ AI prompt successfully copied!\n\nYou can now paste it directly into ChatGPT or Claude.\n\n(Prompt content:\n" + promptText + ")");
+      }).catch(err => {
+        prompt("Please manually copy the following prompt:", promptText);
+      });
     } else {
-        alert("Prompt generated! (Attach your AI chat function here to send it)");
+      prompt("Please manually copy the following prompt:", promptText);
     }
   };
+
+  // 【V2 Feature】: Smooth auto-scroll to results
+  setTimeout(() => {
+    p3.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 50);
 }
 
 function resetAll() {
@@ -398,8 +416,9 @@ function resetAll() {
   document.getElementById('phase1-next').style.display='none';
   document.querySelectorAll('.q-btn').forEach(b=>b.classList.remove('sel'));
   document.querySelectorAll('.cell').forEach(c=>c.classList.remove('active'));
+  // 【V2 Feature】: Smooth scroll back to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 </script>
-
 </body>
 </html>
