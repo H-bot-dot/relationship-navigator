@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Two-Phase Relationship Navigator</title>
 <meta property="og:title" content="Two-Phase Relationship Navigator">
 <meta property="og:description" content="A free interactive tool to analyze relationship dynamics and generate tailored communication strategies & AI prompts.">
@@ -159,6 +159,64 @@ body {
   cursor: pointer; margin-top: 16px; transition: background .2s ease;
 }
 .reset-btn:hover { background: #f8f9fa; }
+/* --- Find this placeholder and REPLACE with the following CSS around Line 116 --- */
+
+/* --- ADD THE FOLLOWING CSS TO FIX MOBILE LAYOUT ISSUES --- */
+@media (max-width: 600px) {
+  /* Fix foundational card size */
+  .wrap { padding: 1rem; }
+  .q-card, .result-box { padding: 1.25rem; }
+
+  /* Issue 1 Fix: Hide English text labels on Progress Bar for space, keep dots */
+  .phase-indicator {
+    justify-content: space-between;
+    gap: 0;
+  }
+  .phase-indicator .phase-label {
+    display: none;
+  }
+  .phase-indicator .phase-dot {
+    width: 26px; height: 26px; /* slightly smaller dots */
+    font-size: 12px;
+  }
+
+  /* Issue 2 Fix: Stack Question Buttons vertically, fill full width */
+  .q-opts {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .q-btn {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 14px;
+    text-align: center; /* Center the long English text */
+    line-height: 1.4;
+  }
+  
+  /* Fix Narrow-down result bar padding for mobile */
+  .context-bar {
+    font-size: 13px;
+    padding: 10px 14px;
+  }
+
+  /* Issue 3 Fix: Enable Horizontal Scroll for the Matrix */
+  .matrix-wrap {
+    overflow-x: auto; /* Enable scroll */
+    -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
+    padding-bottom: 10px; /* Space for scrollbar */
+    margin-right: -1rem; /* Negative margin to let it flush against screen edge */
+    margin-left: -1rem;
+    padding-right: 1rem;
+    padding-left: 1rem;
+    border-radius: 0;
+    box-shadow: none;
+    border-left: 0;
+    border-right: 0;
+  }
+  .matrix-label-row, .matrix-row {
+    min-width: 650px; /* Force it to be wider than mobile screen to enable scrolling */
+  }
+}
 </style>
 </head>
 <body>
@@ -183,9 +241,9 @@ body {
       <div class="q-title">Power: My Position in this Relationship</div>
       <div class="q-hint">Observe who holds the resources or final decision-making power (usually identifiable within 5 seconds).</div>
       <div class="q-opts">
-        <button class="q-btn" onclick="pickQ('power','down',this)">Bottom-up (They have the power)</button>
-        <button class="q-btn" onclick="pickQ('power','peer',this)">Peer (Mutual balance)</button>
-        <button class="q-btn" onclick="pickQ('power','up',this)">Top-down (I have the power)</button>
+        <button class="q-btn" onclick="pickQ('power','down',this)">Bottom-up<br><span style="font-size:12px;opacity:0.8;">(They have power)</span></button>
+        <button class="q-btn" onclick="pickQ('power','peer',this)">Peer-to-peer<br><span style="font-size:12px;opacity:0.8;">(Mutual balance)</span></button>
+        <button class="q-btn" onclick="pickQ('power','up',this)">Top-down<br><span style="font-size:12px;opacity:0.8;">(I have power)</span></button>
       </div>
     </div>
     <div class="q-card">
