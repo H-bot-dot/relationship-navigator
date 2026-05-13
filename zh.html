@@ -409,11 +409,33 @@ function renderResult() {
     </div>`;
 
   document.getElementById('deep-ask').onclick = ()=>{
-    const promptText = `根據以下關係定性，給我一個具體的對話腳本：權力=${CTX.power[st.power]}、目標=${CTX.goal[st.goal]}、邊界=${CTX.role[st.role]}、親疏=${proxLabel}、信任=${trustLabel}。包括開場白、核心訴求的包裝方式，以及如何應對對方可能的抗拒。`;
+    // 將 Set 轉換成字串，準備餵給 AI
+    const addStr = [...adds].join('、');
+    const avoidStr = [...avoids].join('、');
+
+    const promptText = `我準備要進行一場重要的職場/人際溝通。我已經透過框架分析出目前的「底層關係局勢」與「戰略方針」如下：
+
+【關係局勢】
+- 權力：${CTX.power[st.power]}
+- 目標：${CTX.goal[st.goal]}
+- 邊界：${CTX.role[st.role]}
+- 親疏：${proxLabel}
+- 信任：${trustLabel}
+
+【核心戰略與溝通機制】
+- 核心洞察：${ms.core}
+- 可選的技巧（建議機制）：${addStr}
+- 絕對不能踩的雷（避免機制）：${avoidStr}
+
+為了讓你幫我寫出最精準、可以直接照唸的「對話腳本」，請你先反問我 2 個問題：
+1. 我的溝通對象是誰？（例如：直屬主管、別部門同事、客戶）
+2. 我這次溝通的「具體事件或目的」是什麼？（例如：拒絕不合理工作、爭取預算、初次破冰）
+
+請你先只問我這兩個問題。等我回答後，請你「嚴格遵守」上述的【核心戰略與溝通機制】，為我量身打造一套包含「開場白」、「核心訴求的包裝方式」以及「如何應對對方可能抗拒」的具體對話腳本。`;
     
     if(navigator.clipboard) {
       navigator.clipboard.writeText(promptText).then(() => {
-        alert("✅ 已經成功複製 AI 提示詞！\n\n現在你可以直接去貼給 ChatGPT 或 Claude 了。\n\n(提示詞內容：\n" + promptText + ")");
+        alert("✅ 已經成功複製 AI 提示詞！\n\n現在你可以直接去貼給 ChatGPT 或 Claude 了。\n\n(提示詞內容已經包含您畫面上看到的建議與避免機制！)");
       }).catch(err => {
         prompt("請手動複製以下提示詞：", promptText);
       });
