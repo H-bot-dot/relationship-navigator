@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Conflict Prelude & Navigator - Integrated</title>
+<title>Conflict Prelude & Navigator - Final Edition</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -22,7 +22,6 @@
   --serif: 'Noto Serif TC', serif;
   --sans: 'DM Sans', sans-serif;
   
-  /* Navigator Adapted Palette */
   --nav-bg: #faf9f7;
   --card-bg: #ffffff;
   --border-soft: #e8e6e1;
@@ -43,29 +42,25 @@ html, body {
 
 /* ── Stage container ── */
 #stage {
-  position: absolute; inset: 0;
+  position: absolute; inset: 0; height: 100dvh;
   transition: background 1.2s ease, transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.5s ease;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow-y: auto; overflow-x: hidden;
 }
 
 /* ── Screens ── */
 .screen {
-  position: absolute; inset: 0;
+  position: absolute; inset: 0; min-height: 100dvh;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   padding: 2rem 1.5rem;
-  opacity: 0; pointer-events: none;
-  visibility: hidden;
+  opacity: 0; pointer-events: none; visibility: hidden;
   transition: opacity .6s ease, visibility 0s .6s; 
 }
 .screen.active {
-  opacity: 1; pointer-events: all;
-  visibility: visible;
+  opacity: 1; pointer-events: all; visibility: visible;
   transition: opacity .6s ease, visibility 0s 0s;
 }
 
-/* 讓後面的分析頁面支援滾動 */
 .screen.scrollable {
   height: auto; min-height: 100%; justify-content: flex-start;
   padding-top: 5rem; padding-bottom: 4rem;
@@ -88,7 +83,7 @@ html, body {
 #void-input { width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.15); outline: none; font-family: var(--serif); font-size: 18px; font-weight: 300; color: var(--void-text); padding: 10px 0; text-align: center; caret-color: var(--accent-warm); transition: border-color 0.4s ease, placeholder 0.3s ease; }
 #void-input:focus { border-bottom-color: rgba(255,255,255,0.4); }
 #void-input::placeholder { color: var(--void-hint); font-size: 17px; transition: opacity 0.3s ease; }
-.void-bottom { position: absolute; bottom: 3.5rem; width: 100%; max-width: 560px; display: flex; justify-content: center; z-index: 10; }
+.void-bottom { position: relative; bottom: auto; margin-top: 3rem; width: 100%; max-width: 560px; display: flex; justify-content: center; z-index: 10; }
 .void-next-btn { font-family: var(--sans); font-size: 12px; letter-spacing: .08em; color: rgba(255,255,255,0); background: none; border: none; border-bottom: 1px solid rgba(255,255,255,0); cursor: pointer; text-transform: uppercase; padding-bottom: 2px; transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); pointer-events: none; }
 .void-next-btn.visible { color: rgba(255,255,255,0.35); border-bottom-color: rgba(255,255,255,0.15); pointer-events: all; }
 .void-next-btn.visible:hover { color: rgba(255,255,255,0.8); border-bottom-color: rgba(255,255,255,0.5); }
@@ -211,11 +206,12 @@ html, body {
 /* Progressive Blocks */
 #q-goal-block, #q-role-block, #s6-next { display: none; }
 
-/* Matrix Restyle */
+/* Matrix Restyle - Perfect Center */
 .context-bar { font-size: 13px; color: var(--text-sub); padding: 14px 18px; background: var(--card-bg); border-radius: 10px; margin-bottom: 20px; line-height: 1.6; border: 1px solid var(--border-soft); box-shadow: var(--shadow-soft); text-align: center; }
 .context-bar span { color: var(--accent-warm); font-weight: 500; margin: 0 4px; }
-.matrix-wrap { margin-top: 1rem; overflow-x: auto; padding-bottom: 10px; margin-inline: -1rem; padding-inline: 1rem;}
-.matrix-label-row, .matrix-row { display: grid; grid-template-columns: 70px 1fr 1fr 1fr; gap: 8px; margin-bottom: 8px; min-width: 500px; }
+.matrix-wrap { margin-top: 1.5rem; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 16px; }
+.matrix-inner { margin: 0 auto; width: 100%; min-width: 520px; max-width: 580px; padding-right: 24px; }
+.matrix-label-row, .matrix-row { display: grid; grid-template-columns: 60px 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
 .axis-label { font-size: 12px; color: var(--text-sub); text-align: center; padding: 4px 0; font-weight: 500;}
 .row-label { font-size: 12px; color: var(--text-sub); display: flex; align-items: center; justify-content: flex-end; padding-right: 12px; line-height: 1.4; text-align: right; font-weight: 500;}
 
@@ -230,7 +226,7 @@ html, body {
 .cell-title { font-family: var(--serif); font-size: 14px; font-weight: 600; margin-bottom: 6px; color: var(--text-main); }
 .cell-sub { font-size: 12px; line-height: 1.5; color: var(--text-sub); }
 
-/* Result Box Restyle (Legacy overrides) */
+/* Result Box Restyle */
 .result-head { font-family: var(--serif); font-size: 20px; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-main); }
 .core-insight { font-size: 15px; color: var(--text-main); line-height: 1.7; padding: 18px; background: rgba(200, 169, 122, 0.05); border-radius: 8px; border-left: 3px solid var(--accent-warm); margin-bottom: 1.5rem; font-family: var(--serif);}
 .section-label { font-size: 13px; font-weight: 600; color: var(--text-sub); margin: 20px 0 12px; letter-spacing: 0.05em;}
@@ -252,40 +248,104 @@ html, body {
 @keyframes pulseTrack { 0%, 100% { box-shadow: 0 0 0 0 rgba(200, 169, 122, 0); } 50% { box-shadow: 0 0 8px 1px rgba(200, 169, 122, 0.4); } }
 @keyframes floatDrift { 0% { transform: translate(0, 0) rotate(var(--base-rot, 0deg)); } 100% { transform: translate(var(--drift-x, 10px), var(--drift-y, -15px)) rotate(var(--target-rot, 2deg)); } }
 
-@media (max-width: 600px) {
-  .q-opts { flex-direction: column; }
-  .q-btn { width: 100%; }
-}
-
 /* ─────────────────────────────────────────
    REPORT MODAL OVERLAY (MOBILE OPTIMIZED)
 ───────────────────────────────────────── */
 #report-modal-overlay {
   position: fixed; inset: 0; background: rgba(240, 239, 237, 0.85); backdrop-filter: blur(8px);
   z-index: 300; display: flex; align-items: flex-start; justify-content: center;
-  overflow-y: auto; -webkit-overflow-scrolling: touch; /* 整個透明背景負責滾動 */
-  padding: 2rem 1rem; /* 手機上下左右呼吸空間 */
+  overflow-y: auto; -webkit-overflow-scrolling: touch; 
+  padding: 2rem 1rem;
   opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
 }
 #report-modal-overlay.show { opacity: 1; pointer-events: all; }
 
 .report-modal-card {
   background: var(--card-bg); width: 100%; max-width: 600px;
-  /* 移除內部高度限制，讓卡片自然長高 */
   border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); 
   transform: scale(0.95) translateY(10px); transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
   position: relative; border: 1px solid var(--border-soft);
-  margin: auto; /* 適應不同內容長度 */
+  margin: auto; 
 }
 #report-modal-overlay.show .report-modal-card { transform: scale(1) translateY(0); }
 
-/* 背景深度效果 */
 #stage.depth-blur { transform: scale(0.97); filter: blur(3px); opacity: 0.8; pointer-events: none; }
+
+/* ── 全局選單與極簡創作者名片 ── */
+#global-menu-btn {
+  position: fixed; top: 20px; right: 20px; z-index: 1000;
+  background: none; border: none; cursor: pointer; padding: 8px;
+  color: rgba(255,255,255,0.25); transition: color 0.5s ease;
+}
+#global-menu-btn:hover { color: rgba(255,255,255,0.8); }
+body.light-ui #global-menu-btn { color: rgba(0,0,0,0.25); }
+body.light-ui #global-menu-btn:hover { color: rgba(0,0,0,0.6); }
+
+#menu-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.2); backdrop-filter: blur(4px);
+  z-index: 1100; display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+}
+#menu-overlay.show { opacity: 1; pointer-events: all; }
+
+.menu-card {
+  background: var(--card-bg); width: 85%; max-width: 320px;
+  padding: 2.5rem 1.5rem; border-radius: 24px; text-align: center;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.08); border: 1px solid var(--border-soft);
+  transform: translateY(15px) scale(0.98); transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+#menu-overlay.show .menu-card { transform: translateY(0) scale(1); }
+
+.creator-avatar {
+  width: 72px; height: 72px; border-radius: 50%; object-fit: cover;
+  margin-bottom: 16px; border: 1px solid var(--border-soft); box-shadow: var(--shadow-soft);
+}
+.menu-brand { font-family: var(--serif); font-size: 18px; font-weight: 600; color: var(--text-main); margin-bottom: 4px; }
+.menu-title { font-family: var(--sans); font-size: 12px; font-weight: 500; color: var(--accent-warm); letter-spacing: 0.05em; margin-bottom: 16px; text-transform: uppercase; }
+.menu-desc { font-size: 13px; color: var(--text-sub); line-height: 1.6; }
+
+/* ── 📱 手機版專屬優化 (響應式斷行與鍵盤防擋) ── */
+@media (max-width: 600px) {
+  /* 魔法：在小螢幕時隱藏特定 <br>，讓文字順暢流動，避免醜陋的斷層 */
+  .desktop-br { display: none; }
+  
+  /* 稍微加寬卡片，減少文字擠壓 */
+  .menu-card { width: 92%; padding: 2rem 1.25rem; }
+  
+  .q-opts { flex-direction: column; }
+  .q-btn { width: 100%; }
+
+  /* 鍵盤防擋特效 */
+  .void-area, .void-bottom, .pivot-q-wrap {
+    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s;
+  }
+  #s1:focus-within .void-label { opacity: 0; }
+  #s1:focus-within .void-area { transform: translateY(-8vh); }
+  #s1:focus-within .void-bottom { transform: translateY(-8vh); }
+  #s2:focus-within .pivot-q-wrap { transform: translateY(-12vh); }
+}
 </style>
 </head>
 <body>
 
 <div class="intent-anchor" id="global-intent">我希望<span id="anchor-text"></span></div>
+
+<button id="global-menu-btn" onclick="toggleMenu()">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle>
+  </svg>
+</button>
+
+<div id="menu-overlay" onclick="toggleMenu(event)">
+  <div class="menu-card" onclick="event.stopPropagation()">
+    <img src="H-bot.png" alt="H-bot-dot" class="creator-avatar">
+    <div class="menu-brand">H-bot-dot</div>
+    <div class="menu-title">Conflict Navigator</div>
+    <div class="menu-desc">
+      這是一個結合心理學與影響力策略的自我覺察工具。<br class="desktop-br">從宣洩情緒，到找回關係的主導權。
+    </div>
+  </div>
+</div>
 
 <div id="stage">
 
@@ -304,14 +364,14 @@ html, body {
 
   <div class="screen" id="s2">
     <div class="pivot-q-wrap">
-      <p class="pivot-q-text">在這件事裡，<br>你真正想影響的是什麼？</p>
+      <p class="pivot-q-text">在這件事裡，<br class="desktop-br">你真正想影響的是什麼？</p>
       <div class="fill-line">
         <span class="fill-prefix">我希望</span>
         <span id="pivot-fill" contenteditable="true" data-placeholder="⸺" oninput="checkPivot()"></span>
       </div>
       <button class="pivot-next" id="pivot-next" onclick="gotoPivotNext()">繼續</button>
       <p class="pivot-footnote">
-        衝突的核心是試圖影響他人，但對方沒有接受。<br>
+        衝突的核心是試圖影響他人，但對方沒有接受。<br class="desktop-br">
         能說出這句話，代表你已經從感受移向意圖。
       </p>
     </div>
@@ -340,7 +400,7 @@ html, body {
     <div class="gate-wrap">
       <div class="gate-mark">◎</div>
       <h2 class="gate-title">可以進入關係分析了</h2>
-      <p class="gate-body">雙方狀態都相對穩定。<br>這是進行關係定性的好時機。</p>
+      <p class="gate-body">雙方狀態都相對穩定。<br class="desktop-br">這是進行關係定性的好時機。</p>
       <div class="intent-strip">
         <div class="intent-label">你的意圖</div>
         <div class="intent-text" id="intent-display"></div>
@@ -354,8 +414,8 @@ html, body {
       <div class="caution-icon">☕</div>
       <h2 class="caution-title">先讓自己緩一緩</h2>
       <p class="caution-body" id="caution-body"></p>
-      <p class="caution-wisdom">停下來不是認輸，<br>是等一個能真正溝通的時機。</p>
-      <button class="caution-rest" onclick="location.reload()">好，先放著</button>
+      <p class="caution-wisdom">停下來不是認輸，<br class="desktop-br">是等一個能真正溝通的時機。</p>
+      <button class="caution-rest" onclick="restartApp()">好，先放著</button>
       <button class="caution-force" onclick="gotoScreen(5)">我了解，還是繼續分析</button>
     </div>
   </div>
@@ -363,12 +423,10 @@ html, body {
   <div class="screen" id="s5">
     <div class="wall-wrap">
       <div class="wall-intent-quote">「我希望<span id="wall-intent-text"></span>」</div>
-      <p class="wall-body">
-        你的意圖很明確。<br>
-        但要將它傳遞過去，中間有一面由<span>「關係結構」</span>砌成的牆。<br><br>
-        接下來的三個問題，不是要評斷對錯，<br>
-        而是要幫你客觀量測這面牆的<span>材質與厚度</span>。
-      </p>
+      <div class="wall-body">
+        <p style="margin-bottom: 1.5rem;">你的意圖很明確。<br class="desktop-br">但要將它傳遞過去，中間有一面由<span>「關係結構」</span>砌成的牆。</p>
+        <p>接下來的三個問題，不是要評斷對錯，<br class="desktop-br">而是要幫你客觀量測這面牆的<span>材質與厚度</span>。</p>
+      </div>
       <button class="action-btn-primary" style="max-width: 200px; margin: 0 auto;" onclick="startNavigator()">開始量測牆面</button>
     </div>
   </div>
@@ -417,70 +475,72 @@ html, body {
       <div class="context-bar" id="context-bar"></div>
       
       <div style="font-size:14px; color:var(--text-sub); margin-bottom:16px; line-height:1.6; text-align:center;">
-        在收縮後的地形上，點擊矩陣中最符合的格子<br>定位你們目前的信任與親疏溫度
+        在收縮後的地形上，點擊矩陣中最符合的格子<br class="desktop-br">定位你們目前的信任與親疏溫度
       </div>
       
       <div class="matrix-wrap">
-        <div class="matrix-label-row">
-          <div></div>
-          <div class="axis-label">低信任<br><span style="font-size:11px;opacity:.7">預設我有隱藏動機</span></div>
-          <div class="axis-label">條件信任<br><span style="font-size:11px;opacity:.7">聽其言觀其行</span></div>
-          <div class="axis-label">高信任<br><span style="font-size:11px;opacity:.7">預設我無惡意</span></div>
-        </div>
-        <div class="matrix-row">
-          <div class="row-label">親近<br>強連結</div>
-          <div class="cell" onclick="pickCell('close','low',this)">
-            <div class="cell-title">破裂後的親密</div>
-            <div class="cell-sub">曾信任、現受傷。最難修復的地形</div>
+        <div class="matrix-inner">
+          <div class="matrix-label-row">
+            <div></div>
+            <div class="axis-label">低信任<br><span style="font-size:11px;opacity:.7">預設我有隱藏動機</span></div>
+            <div class="axis-label">條件信任<br><span style="font-size:11px;opacity:.7">聽其言觀其行</span></div>
+            <div class="axis-label">高信任<br><span style="font-size:11px;opacity:.7">預設我無惡意</span></div>
           </div>
-          <div class="cell" onclick="pickCell('close','cond',this)">
-            <div class="cell-title">深厚但審慎</div>
-            <div class="cell-sub">情感深厚，但對方在觀察你的一致性</div>
+          <div class="matrix-row">
+            <div class="row-label">親近<br>強連結</div>
+            <div class="cell" onclick="pickCell('close','low',this)">
+              <div class="cell-title">破裂後的親密</div>
+              <div class="cell-sub">曾信任、現受傷。最難修復的地形</div>
+            </div>
+            <div class="cell" onclick="pickCell('close','cond',this)">
+              <div class="cell-title">深厚但審慎</div>
+              <div class="cell-sub">情感深厚，但對方在觀察你的一致性</div>
+            </div>
+            <div class="cell" onclick="pickCell('close','high',this)">
+              <div class="cell-title">完全開放</div>
+              <div class="cell-sub">最自由的地形，直言才是最強武器</div>
+            </div>
           </div>
-          <div class="cell" onclick="pickCell('close','high',this)">
-            <div class="cell-title">完全開放</div>
-            <div class="cell-sub">最自由的地形，直言才是最強武器</div>
+          <div class="matrix-row">
+            <div class="row-label">中立<br>弱連結</div>
+            <div class="cell" onclick="pickCell('neutral','low',this)">
+              <div class="cell-title">陌生且警戒</div>
+              <div class="cell-sub">有特定原因不信任你，需先釐清</div>
+            </div>
+            <div class="cell" onclick="pickCell('neutral','cond',this)">
+              <div class="cell-title">標準職場地形</div>
+              <div class="cell-sub">大多數同事關係的起點</div>
+            </div>
+            <div class="cell" onclick="pickCell('neutral','high',this)">
+              <div class="cell-title">自然開放的陌生人</div>
+              <div class="cell-sub">對方友善，影響力通道暢通</div>
+            </div>
           </div>
-        </div>
-        <div class="matrix-row">
-          <div class="row-label">中立<br>弱連結</div>
-          <div class="cell" onclick="pickCell('neutral','low',this)">
-            <div class="cell-title">陌生且警戒</div>
-            <div class="cell-sub">有特定原因不信任你，需先釐清</div>
-          </div>
-          <div class="cell" onclick="pickCell('neutral','cond',this)">
-            <div class="cell-title">標準職場地形</div>
-            <div class="cell-sub">大多數同事關係的起點</div>
-          </div>
-          <div class="cell" onclick="pickCell('neutral','high',this)">
-            <div class="cell-title">自然開放的陌生人</div>
-            <div class="cell-sub">對方友善，影響力通道暢通</div>
-          </div>
-        </div>
-        <div class="matrix-row">
-          <div class="row-label">疏遠<br>零連結</div>
-          <div class="cell" onclick="pickCell('distant','low',this)">
-            <div class="cell-title">最危險的地形</div>
-            <div class="cell-sub">雙重防禦。任何訴求都被視為入侵</div>
-          </div>
-          <div class="cell" onclick="pickCell('distant','cond',this)">
-            <div class="cell-title">初次接觸</div>
-            <div class="cell-sub">典型的冷陌生人，需從可信任性建起</div>
-          </div>
-          <div class="cell" onclick="pickCell('distant','high',this)">
-            <div class="cell-title">開放的陌生人</div>
-            <div class="cell-sub">對方友善但沒有交集</div>
+          <div class="matrix-row">
+            <div class="row-label">疏遠<br>零連結</div>
+            <div class="cell" onclick="pickCell('distant','low',this)">
+              <div class="cell-title">最危險的地形</div>
+              <div class="cell-sub">雙重防禦。任何訴求都被視為入侵</div>
+            </div>
+            <div class="cell" onclick="pickCell('distant','cond',this)">
+              <div class="cell-title">初次接觸</div>
+              <div class="cell-sub">典型的冷陌生人，需從可信任性建起</div>
+            </div>
+            <div class="cell" onclick="pickCell('distant','high',this)">
+              <div class="cell-title">開放的陌生人</div>
+              <div class="cell-sub">對方友善但沒有交集</div>
+            </div>
           </div>
         </div>
       </div>
+
     </div>
   </div>
 
 </div>
 
 <div id="report-modal-overlay">
-  <div class="report-modal-card" id="result-container">
-  </div>
+  <div class="report-modal-card" id="result-container"></div>
 </div>
 
 <div id="ink-overlay">
@@ -588,11 +648,12 @@ function burnIt() {
   }, 2600);
 }
 
+// 已解除字數限制
 function checkPivot() {
   const v = document.getElementById('pivot-fill').textContent.trim();
   app.pivotText = v;
   const btn = document.getElementById('pivot-next');
-  if (v.length > 4) btn.classList.add('ready'); else btn.classList.remove('ready');
+  if (v.length > 0) btn.classList.add('ready'); else btn.classList.remove('ready');
 }
 
 function gotoPivotNext() {
@@ -648,14 +709,19 @@ function gotoScreen(id) {
   
   const bg = { 1: '#0e0e10', 2: '#faf9f7', 3: '#f5f4f1', '4a': '#f7faf7', '4b': '#faf8f4' };
   document.getElementById('stage').style.background = bg[id] || 'var(--nav-bg)';
+
+  if (id === 1 || id === '1') {
+    document.body.classList.remove('light-ui');
+  } else {
+    document.body.classList.add('light-ui');
+  }
   
   setTimeout(() => {
     document.getElementById('stage').scrollTo(0, 0);
   }, 300);
 
-  // Handle Intent Anchor Visibility
   const anchor = document.getElementById('global-intent');
-  if (id === 6 || id === 7) {
+  if (id === 6 || id === '6' || id === 7 || id === '7') {
     anchor.classList.add('visible');
   } else {
     anchor.classList.remove('visible');
@@ -830,8 +896,8 @@ function renderResult() {
         複製幕僚提示詞
       </button>
       
-      <button class="action-btn-secondary" style="width:100%; margin-top:32px; padding:14px; font-weight:600;" onclick="closeReportModal()">
-        返回地形矩陣
+      <button class="action-btn-secondary" style="width:100%; margin-top:24px; padding:12px; font-weight:600; border:none;" onclick="closeReportModal()">
+        尚未結束，返回地形矩陣
       </button>
     </div>`;
 
@@ -841,10 +907,17 @@ function renderResult() {
       navigator.clipboard.writeText(promptText).then(() => {
         btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> 已成功複製！`;
         btn.style.background = '#4a6c52'; 
+        btn.style.color = '#fff';
+        
         setTimeout(() => {
-          btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> 複製幕僚提示詞`;
-          btn.style.background = 'var(--text-main)';
-        }, 3000);
+          btn.innerHTML = `任務完成，即將為您重置並回到樹洞...`;
+          btn.style.background = 'transparent';
+          btn.style.color = 'var(--text-sub)';
+        }, 2500);
+
+        setTimeout(() => {
+          restartApp();
+        }, 5000);
       });
     } else {
       prompt("請手動複製以下提示詞：", promptText);
@@ -865,6 +938,45 @@ function closeReportModal() {
   setTimeout(() => {
     document.getElementById('result-container').innerHTML = '';
   }, 400); 
+}
+
+/* ── Menu & Restart Logic ── */
+function toggleMenu(e) {
+  const overlay = document.getElementById('menu-overlay');
+  overlay.classList.toggle('show');
+}
+
+function restartApp() {
+  document.getElementById('menu-overlay').classList.remove('show');
+  
+  const overlay = document.getElementById('report-modal-overlay');
+  if(overlay.classList.contains('show')) {
+      closeReportModal();
+  }
+
+  setTimeout(() => {
+      app.pivotText = '';
+      app.myVal = 50; app.otherVal = 50;
+      app.nav = { power: null, goal: null, role: null, prox: null, trust: null };
+      slidersTouched = { my: false, other: false };
+
+      document.getElementById('pivot-fill').textContent = '';
+      document.getElementById('my-slider').value = 50; 
+      document.getElementById('other-slider').value = 50;
+      document.getElementById('my-slider').classList.add('untouched');
+      document.getElementById('other-slider').classList.add('untouched');
+      document.getElementById('my-val').textContent = '請點擊或滑動評估';
+      document.getElementById('other-val').textContent = '請點擊或滑動評估';
+      document.getElementById('state-next-btn').classList.remove('ready');
+      document.querySelectorAll('.q-btn, .cell').forEach(el => el.classList.remove('sel', 'active'));
+      
+      document.getElementById('void-input-block').style.opacity = '1';
+      document.getElementById('void-next-step').style.opacity = '1';
+      document.getElementById('void-next-step').classList.remove('visible');
+      document.getElementById('void-input').value = '';
+
+      gotoScreen(1);
+  }, 400);
 }
 </script>
 </body>
