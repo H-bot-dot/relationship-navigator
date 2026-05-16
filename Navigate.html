@@ -102,7 +102,7 @@ html, body {
 #s2 { background: var(--pivot-bg); }
 .pivot-q-wrap { text-align: center; max-width: 480px; width: 100%; }
 .pivot-q-text { font-family: var(--serif); font-size: 24px; font-weight: 300; color: var(--pivot-text); line-height: 1.5; margin-bottom: 3rem; animation: riseIn 1s ease both; }
-.fill-line { display: flex; align-items: baseline; gap: 0; font-family: var(--serif); font-size: 20px; font-weight: 300; color: var(--pivot-text); justify-content: center; flex-wrap: wrap; row-gap: .5rem; animation: riseIn 1.2s ease both; }
+.fill-line { display: flex; align-items: baseline; gap: 0; font-family: var(--serif); font-size: 20px; font-weight: 300; color: var(--pivot-text); justify-content: center; flex-wrap: row; row-gap: .5rem; animation: riseIn 1.2s ease both; }
 .fill-prefix { color: var(--pivot-muted); white-space: nowrap; margin-right: 8px; }
 #pivot-fill { display: inline-block; min-width: 140px; max-width: 100%; background: none; border: none; border-bottom: 1.5px solid #ccc; outline: none; font-family: var(--serif); font-size: 20px; font-weight: 300; color: var(--pivot-text); padding: 4px 4px; caret-color: var(--accent-warm); transition: border-color .3s; text-align: left; word-break: break-word; line-height: 1.4; vertical-align: bottom; }
 #pivot-fill:empty::before { content: attr(data-placeholder); color: #ccc; pointer-events: none; }
@@ -309,13 +309,11 @@ body.light-ui #global-menu-btn:hover { color: rgba(0,0,0,0.6); }
   /* 魔法：在小螢幕時隱藏特定 <br>，讓文字順暢流動，避免醜陋的斷層 */
   .desktop-br { display: none; }
   
-  /* 稍微加寬卡片，減少文字擠壓 */
   .menu-card { width: 92%; padding: 2rem 1.25rem; }
   
   .q-opts { flex-direction: column; }
   .q-btn { width: 100%; }
 
-  /* 鍵盤防擋特效 */
   .void-area, .void-bottom, .pivot-q-wrap {
     transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s;
   }
@@ -370,6 +368,7 @@ body.light-ui #global-menu-btn:hover { color: rgba(0,0,0,0.6); }
         <span id="pivot-fill" contenteditable="true" data-placeholder="⸺" oninput="checkPivot()"></span>
       </div>
       <button class="pivot-next" id="pivot-next" onclick="gotoPivotNext()">繼續</button>
+      
       <p class="pivot-footnote">
         很多人只是一直感受，沒有辦法說出想要什麼。<br class="desktop-br">
         能說出這句話，代表你已經從感受移向意圖。
@@ -648,7 +647,6 @@ function burnIt() {
   }, 2600);
 }
 
-// 已解除字數限制
 function checkPivot() {
   const v = document.getElementById('pivot-fill').textContent.trim();
   app.pivotText = v;
@@ -848,7 +846,7 @@ function renderResult() {
 請產出以下內容：
 1. 【開場定調】：基於目前的信任度與雙方情緒，開場可以用什麼樣的姿態來安全破冰？（請給出 2 種不同氛圍的對話起手式範例）
 2. 【三個維度的切入點提案 (Angles)】：根據上述「建議納入的溝通機制」，為我構思 3 種不同視角的切入點。請客觀說明「這個切入點背後的策略意圖與心理動力是什麼」，供我自行評估最適合目前局勢的做法。
-3. 【互動節奏建議】：在這個特定地形下，提出想法後我應該拿捏什麼樣的節奏？（例如：適合推進確認，還是應該主動留白、降低壓力？）
+3. 【互動節奏建議】：在這個特定地形下，提出想法後我應該拿捏什麼樣的節奏？（例如：適合推進確認，還是應該主推留白、降低壓力？）
 4. 【動態微調提醒】：結尾請用一句話提醒我，正式開口時可以根據對方的哪些「即時微表情或反應」來隨機應變。`;
 
   pContainer.innerHTML = `
