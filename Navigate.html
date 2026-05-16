@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Conflict Prelude & Navigator - Integrated</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --void-bg: #0e0e10;
+  --void-transition: #2c2b2f; 
+  --void-text: rgba(255,255,255,0.82);
+  --void-hint: rgba(255,255,255,0.28);
+  --pivot-bg: #faf9f7;
+  --pivot-text: #1a1a1a;
+  --pivot-muted: #888;
+  --state-bg: #f5f4f1;
+  --state-text: #1a1a1a;
+  --accent-warm: #c8a97a;
+  --accent-cool: #7a9ec8;
+  --serif: 'Noto Serif TC', serif;
+  --sans: 'DM Sans', sans-serif;
+  
+  /* Navigator Adapted Palette */
+  --nav-bg: #faf9f7;
+  --card-bg: #ffffff;
+  --border-soft: #e8e6e1;
+  --shadow-soft: 0 4px 12px rgba(0,0,0,0.03);
+  --text-main: #2d2d2d;
+  --text-sub: #777;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%; width: 100%;
+  -webkit-font-smoothing: antialiased;
+  background-color: var(--void-bg);
+  font-family: var(--sans);
+  color: var(--text-main);
+}
+
+/* ── Stage container ── */
+#stage {
+  position: absolute; inset: 0;
+  transition: background 1.2s ease, transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.5s ease;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ── Screens ── */
+.screen {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 2rem 1.5rem;
+  opacity: 0; pointer-events: none;
+  visibility: hidden;
+  transition: opacity .6s ease, visibility 0s .6s; 
+}
+.screen.active {
+  opacity: 1; pointer-events: all;
+  visibility: visible;
+  transition: opacity .6s ease, visibility 0s 0s;
+}
+
+/* 讓後面的分析頁面支援滾動 */
+.screen.scrollable {
+  height: auto; min-height: 100%; justify-content: flex-start;
+  padding-top: 5rem; padding-bottom: 4rem;
+}
+.screen.scrollable:not(.active) {
+  height: 0; min-height: 0; padding-top: 0; padding-bottom: 0; overflow: hidden;
+  transition: opacity .6s ease, visibility 0s .6s, height 0s .6s, min-height 0s .6s, padding 0s .6s;
+}
+
+/* ─────────────────────────────────────────
+   SCREEN 1 — THE VOID
+───────────────────────────────────────── */
+#s1 { background: var(--void-bg); }
+.void-label { font-size: 11px; letter-spacing: .2em; color: rgba(255,255,255,.18); text-transform: uppercase; position: absolute; top: 3rem; animation: floatIn 1.2s ease both; }
+#floating-container { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 5; }
+.floating-phrase { position: absolute; font-family: var(--serif); font-size: 18px; font-weight: 300; color: rgba(255,255,255,0.7); white-space: nowrap; will-change: transform, opacity, filter; animation: floatDrift 14s infinite ease-in-out alternate; transition: opacity 1.2s ease, filter 1.2s ease; }
+.floating-phrase.fade-out { opacity: 0 !important; filter: blur(6px) scale(0.95); }
+.void-area { width: 100%; max-width: 560px; display: flex; flex-direction: column; justify-content: center; position: relative; z-index: 10; }
+.void-input-wrap { width: 100%; max-width: 420px; margin: 0 auto; position: relative; animation: floatIn 1.4s ease both; transition: opacity 0.6s ease; }
+#void-input { width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.15); outline: none; font-family: var(--serif); font-size: 18px; font-weight: 300; color: var(--void-text); padding: 10px 0; text-align: center; caret-color: var(--accent-warm); transition: border-color 0.4s ease, placeholder 0.3s ease; }
+#void-input:focus { border-bottom-color: rgba(255,255,255,0.4); }
+#void-input::placeholder { color: var(--void-hint); font-size: 17px; transition: opacity 0.3s ease; }
+.void-bottom { position: absolute; bottom: 3.5rem; width: 100%; max-width: 560px; display: flex; justify-content: center; z-index: 10; }
+.void-next-btn { font-family: var(--sans); font-size: 12px; letter-spacing: .08em; color: rgba(255,255,255,0); background: none; border: none; border-bottom: 1px solid rgba(255,255,255,0); cursor: pointer; text-transform: uppercase; padding-bottom: 2px; transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); pointer-events: none; }
+.void-next-btn.visible { color: rgba(255,255,255,0.35); border-bottom-color: rgba(255,255,255,0.15); pointer-events: all; }
+.void-next-btn.visible:hover { color: rgba(255,255,255,0.8); border-bottom-color: rgba(255,255,255,0.5); }
+
+/* ── Ink dissolve overlay ── */
+#ink-overlay { position: fixed; inset: 0; z-index: 200; background: var(--void-bg); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .4s ease, background 1.5s ease; overflow: hidden; }
+#ink-overlay.show { opacity: 1; pointer-events: all; }
+#ink-overlay.transition-bg { background: var(--void-transition); }
+.ink-msg { font-family: var(--serif); font-size: 18px; font-weight: 300; color: rgba(255,255,255,.5); letter-spacing: .06em; opacity: 0; transition: opacity .6s ease; }
+#ink-overlay.show .ink-msg { opacity: 1; }
+.ink-particle { position: absolute; border-radius: 50%; background: rgba(200, 169, 122, 0.15); animation: inkSpread 2s ease-out forwards; }
+
+/* ─────────────────────────────────────────
+   SCREEN 2 — PIVOT
+───────────────────────────────────────── */
+#s2 { background: var(--pivot-bg); }
+.pivot-q-wrap { text-align: center; max-width: 480px; width: 100%; }
+.pivot-q-text { font-family: var(--serif); font-size: 24px; font-weight: 300; color: var(--pivot-text); line-height: 1.5; margin-bottom: 3rem; animation: riseIn 1s ease both; }
+.fill-line { display: flex; align-items: baseline; gap: 0; font-family: var(--serif); font-size: 20px; font-weight: 300; color: var(--pivot-text); justify-content: center; flex-wrap: wrap; row-gap: .5rem; animation: riseIn 1.2s ease both; }
+.fill-prefix { color: var(--pivot-muted); white-space: nowrap; margin-right: 8px; }
+#pivot-fill { display: inline-block; min-width: 140px; max-width: 100%; background: none; border: none; border-bottom: 1.5px solid #ccc; outline: none; font-family: var(--serif); font-size: 20px; font-weight: 300; color: var(--pivot-text); padding: 4px 4px; caret-color: var(--accent-warm); transition: border-color .3s; text-align: left; word-break: break-word; line-height: 1.4; vertical-align: bottom; }
+#pivot-fill:empty::before { content: attr(data-placeholder); color: #ccc; pointer-events: none; }
+#pivot-fill:focus { border-bottom-color: var(--accent-warm); }
+.pivot-next { font-family: var(--sans); font-size: 12px; letter-spacing: .1em; color: rgba(26,26,26,.0); background: none; border: none; cursor: pointer; text-transform: uppercase; margin-top: 3rem; transition: color .4s ease; display: block; width: 100%; text-align: center; animation: riseIn 1.4s ease both; pointer-events: none; }
+.pivot-next.ready { color: rgba(26,26,26,.45); pointer-events: all; }
+.pivot-next.ready:hover { color: rgba(26,26,26,.85); }
+.pivot-footnote { font-family: var(--sans); font-size: 12px; color: #bbb; line-height: 1.6; text-align: center; max-width: 340px; margin-top: 4rem; margin-inline: auto; animation: riseIn 1.8s ease both; }
+
+/* ─────────────────────────────────────────
+   SCREEN 3 — STATE SLIDERS
+───────────────────────────────────────── */
+#s3 { background: var(--state-bg); }
+.state-wrap { max-width: 480px; width: 100%; margin: 0 auto; }
+.state-q { font-family: var(--serif); font-size: 20px; font-weight: 300; color: var(--state-text); margin-bottom: 2rem; line-height: 1.5; }
+.state-q span { color: var(--pivot-muted); font-size: 14px; display: block; margin-top: .3rem; font-family: var(--sans); }
+.slider-block { margin-bottom: 2.5rem; }
+.slider-who { font-family: var(--sans); font-size: 11px; letter-spacing: .12em; color: var(--pivot-muted); text-transform: uppercase; margin-bottom: .75rem; }
+.slider-poles { display: flex; justify-content: space-between; font-family: var(--sans); font-size: 12px; color: #aaa; margin-bottom: .4rem; }
+.state-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 3px; border-radius: 2px; background: linear-gradient(to right, #e0cbb3 0%, #e0cbb3 50%, #b3c8e0 100%); outline: none; cursor: pointer; }
+.state-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 1.5px solid #ccc; cursor: pointer; transition: border-color .2s, box-shadow .2s, opacity .3s; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+.state-slider::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 1.5px solid #ccc; cursor: pointer; transition: border-color .2s, box-shadow .2s, opacity .3s; }
+.state-slider.untouched::-webkit-slider-thumb { opacity: 0; }
+.state-slider.untouched::-moz-range-thumb { opacity: 0; }
+.state-slider.untouched { animation: pulseTrack 2s infinite ease-in-out; }
+.state-slider::-webkit-slider-thumb:hover { border-color: var(--accent-warm); box-shadow: 0 0 0 4px rgba(200,169,122,.15); }
+.state-slider::-moz-range-thumb:hover { border-color: var(--accent-warm); box-shadow: 0 0 0 4px rgba(200,169,122,.15); }
+.slider-val { font-family: var(--sans); font-size: 12px; color: #999; text-align: center; margin-top: .6rem; min-height: 16px; transition: color .3s; }
+.state-next { font-family: var(--sans); font-size: 12px; letter-spacing: .1em; color: rgba(26,26,26,.0); background: none; border: none; cursor: pointer; text-transform: uppercase; display: block; width: 100%; text-align: center; margin-top: 1rem; transition: color .3s; pointer-events: none; }
+.state-next.ready { color: rgba(26,26,26,.35); pointer-events: all; }
+.state-next.ready:hover { color: rgba(26,26,26,.75); }
+
+/* ── SCREEN 4a & 4b (GATE & CAUTION) ── */
+#s4a { background: #f7faf7; }
+.gate-wrap { max-width: 440px; width: 100%; text-align: center; margin: 0 auto; }
+.gate-mark { width: 48px; height: 48px; border-radius: 50%; background: rgba(100,180,110,.12); border: 1px solid rgba(100,180,110,.3); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 20px; animation: riseIn .8s ease both; }
+.gate-title { font-family: var(--serif); font-size: 22px; font-weight: 300; color: var(--state-text); margin-bottom: .75rem; animation: riseIn 1s ease both; }
+.gate-body { font-family: var(--sans); font-size: 14px; color: #777; line-height: 1.7; margin-bottom: 2rem; animation: riseIn 1.2s ease both; }
+.intent-strip { background: #fff; border: 1px solid var(--border-soft); border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 2rem; text-align: left; animation: riseIn 1.3s ease both; }
+.intent-label { font-family: var(--sans); font-size: 10px; letter-spacing: .12em; color: #bbb; text-transform: uppercase; margin-bottom: 6px; }
+.intent-text { font-family: var(--serif); font-size: 15px; font-weight: 300; color: var(--state-text); line-height: 1.6; }
+.gate-cta { font-family: var(--sans); font-size: 13px; letter-spacing: .08em; color: rgba(26,26,26,.55); background: none; border: none; border-bottom: 1px solid rgba(26,26,26,.2); cursor: pointer; text-transform: uppercase; padding-bottom: 2px; transition: all .2s; animation: riseIn 1.5s ease both; }
+.gate-cta:hover { color: var(--state-text); border-bottom-color: var(--state-text); }
+
+#s4b { background: #faf8f4; }
+.caution-wrap { max-width: 440px; width: 100%; text-align: center; margin: 0 auto; }
+.caution-icon { font-size: 36px; margin-bottom: 1.5rem; animation: riseIn .8s ease both; line-height: 1; }
+.caution-title { font-family: var(--serif); font-size: 22px; font-weight: 300; color: var(--state-text); margin-bottom: .75rem; animation: riseIn 1s ease both; }
+.caution-body { font-family: var(--sans); font-size: 14px; color: #888; line-height: 1.75; margin-bottom: 2rem; animation: riseIn 1.2s ease both; }
+.caution-wisdom { font-family: var(--serif); font-size: 13px; font-weight: 300; color: #b0a090; margin-bottom: 2.5rem; font-style: italic; animation: riseIn 1.4s ease both; }
+.caution-rest { font-family: var(--sans); font-size: 12px; letter-spacing: .06em; color: #bbb; background: none; border: none; cursor: pointer; text-transform: uppercase; display: block; width: 100%; text-align: center; margin-bottom: .75rem; transition: color .2s; animation: riseIn 1.5s ease both; }
+.caution-rest:hover { color: #888; }
+.caution-force { font-family: var(--sans); font-size: 11px; color: #d0c8bc; background: none; border: none; cursor: pointer; text-decoration: underline; text-decoration-color: #ddd; animation: riseIn 1.7s ease both; transition: color .2s; }
+.caution-force:hover { color: #aaa; }
+
+/* ─────────────────────────────────────────
+   SCREEN 5 — THE WALL METAPHOR
+───────────────────────────────────────── */
+#s5 { background: var(--nav-bg); }
+.wall-wrap { max-width: 440px; width: 100%; text-align: center; margin: 0 auto; }
+.wall-intent-quote { font-family: var(--serif); font-size: 20px; font-weight: 400; color: var(--accent-warm); margin-bottom: 2rem; line-height: 1.5; font-style: italic; animation: riseIn 1s ease both; }
+.wall-body { font-family: var(--sans); font-size: 15px; color: var(--text-sub); line-height: 1.8; margin-bottom: 3rem; animation: riseIn 1.2s ease both; }
+.wall-body span { color: var(--text-main); font-weight: 500; }
+
+/* ─────────────────────────────────────────
+   SCREEN 6-8 — NAVIGATOR UI HARMONY & INTENT ANCHOR
+───────────────────────────────────────── */
+.nav-wrap { max-width: 600px; width: 100%; margin: 0 auto; position: relative; }
+
+/* The Intent Anchor */
+.intent-anchor {
+  position: fixed; top: 0; left: 0; right: 0;
+  background: rgba(250,249,247,0.95); backdrop-filter: blur(8px);
+  padding: 12px 20px; text-align: center; z-index: 100;
+  border-bottom: 1px solid var(--border-soft);
+  font-family: var(--serif); font-size: 14px; color: var(--text-main); font-weight: 400;
+  opacity: 0; transform: translateY(-100%); transition: all 0.5s ease;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+}
+.intent-anchor.visible { opacity: 1; transform: translateY(0); }
+.intent-anchor span { color: var(--accent-warm); margin-left: 6px; font-style: italic;}
+
+/* Softened Q-Cards */
+.q-card {
+  background: var(--card-bg); border-radius: 12px; padding: 1.8rem; margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-soft); border: 1px solid var(--border-soft);
+  animation: riseIn 0.6s ease both;
+}
+.q-title { font-family: var(--serif); font-size: 18px; font-weight: 600; color: var(--text-main); margin-bottom: 8px; }
+.q-hint { font-size: 13px; color: var(--text-sub); margin-bottom: 20px; line-height: 1.6; }
+.q-opts { display: flex; gap: 12px; flex-wrap: wrap; }
+.q-btn {
+  flex: 1; min-width: 120px; font-size: 14px; padding: 12px 16px; 
+  border: 1px solid var(--border-soft); border-radius: 8px; background: transparent;
+  color: var(--text-sub); cursor: pointer; transition: all .2s ease;
+  font-family: var(--sans); text-align: center;
+}
+.q-btn:hover { background: #fdfdfd; border-color: #d0d0d0; }
+.q-btn.sel { background: rgba(200, 169, 122, 0.08); color: var(--accent-warm); border-color: var(--accent-warm); font-weight: 500; }
+
+/* Progressive Blocks */
+#q-goal-block, #q-role-block, #s6-next { display: none; }
+
+/* Matrix Restyle */
+.context-bar { font-size: 13px; color: var(--text-sub); padding: 14px 18px; background: var(--card-bg); border-radius: 10px; margin-bottom: 20px; line-height: 1.6; border: 1px solid var(--border-soft); box-shadow: var(--shadow-soft); text-align: center; }
+.context-bar span { color: var(--accent-warm); font-weight: 500; margin: 0 4px; }
+.matrix-wrap { margin-top: 1rem; overflow-x: auto; padding-bottom: 10px; margin-inline: -1rem; padding-inline: 1rem;}
+.matrix-label-row, .matrix-row { display: grid; grid-template-columns: 70px 1fr 1fr 1fr; gap: 8px; margin-bottom: 8px; min-width: 500px; }
+.axis-label { font-size: 12px; color: var(--text-sub); text-align: center; padding: 4px 0; font-weight: 500;}
+.row-label { font-size: 12px; color: var(--text-sub); display: flex; align-items: center; justify-content: flex-end; padding-right: 12px; line-height: 1.4; text-align: right; font-weight: 500;}
+
+.cell {
+  border-radius: 10px; padding: 16px 12px; background: var(--card-bg);
+  cursor: pointer; border: 2px solid transparent; transition: all .2s ease;
+  min-height: 80px; display: flex; flex-direction: column; justify-content: flex-start;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+}
+.cell:hover { transform: translateY(-2px); box-shadow: var(--shadow-soft); border-color: #eaeaea; }
+.cell.active { border-color: var(--accent-warm); background: rgba(200, 169, 122, 0.03); }
+.cell-title { font-family: var(--serif); font-size: 14px; font-weight: 600; margin-bottom: 6px; color: var(--text-main); }
+.cell-sub { font-size: 12px; line-height: 1.5; color: var(--text-sub); }
+
+/* Result Box Restyle (Legacy overrides) */
+.result-head { font-family: var(--serif); font-size: 20px; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-main); }
+.core-insight { font-size: 15px; color: var(--text-main); line-height: 1.7; padding: 18px; background: rgba(200, 169, 122, 0.05); border-radius: 8px; border-left: 3px solid var(--accent-warm); margin-bottom: 1.5rem; font-family: var(--serif);}
+.section-label { font-size: 13px; font-weight: 600; color: var(--text-sub); margin: 20px 0 12px; letter-spacing: 0.05em;}
+.tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1.5rem; }
+.tag { font-size: 13px; padding: 6px 14px; border-radius: 20px; border: 1px solid; }
+.tag-g { background: #fdfdfc; color: #4a6c52; border-color: #d1e0d5; }
+.tag-w { background: #fdfdfc; color: #8e6c45; border-color: #e0d5c1; }
+.divider { height: 1px; background: var(--border-soft); margin: 24px 0; }
+
+.action-btn-primary { font-family: var(--sans); font-size: 14px; padding: 14px; border: none; border-radius: 8px; background: var(--text-main); color: #fff; cursor: pointer; width: 100%; text-align: center; transition: background .2s ease; box-shadow: var(--shadow-soft); margin-top: 10px;}
+.action-btn-primary:hover { background: #1a1a1a; }
+.action-btn-secondary { font-family: var(--sans); font-size: 13px; padding: 10px; border: 1px solid var(--border-soft); border-radius: 8px; background: transparent; color: var(--text-sub); cursor: pointer; transition: all .2s ease; text-align: center; }
+.action-btn-secondary:hover { background: #f9f9f9; color: var(--text-main); }
+
+/* ── ANIMATIONS ── */
+@keyframes floatIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes riseIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes inkSpread { 0% { transform: scale(0); opacity: .6; } 60% { opacity: .3; } 100% { transform: scale(8); opacity: 0; } }
+@keyframes pulseTrack { 0%, 100% { box-shadow: 0 0 0 0 rgba(200, 169, 122, 0); } 50% { box-shadow: 0 0 8px 1px rgba(200, 169, 122, 0.4); } }
+@keyframes floatDrift { 0% { transform: translate(0, 0) rotate(var(--base-rot, 0deg)); } 100% { transform: translate(var(--drift-x, 10px), var(--drift-y, -15px)) rotate(var(--target-rot, 2deg)); } }
+
+@media (max-width: 600px) {
+  .q-opts { flex-direction: column; }
+  .q-btn { width: 100%; }
+}
+
+/* ─────────────────────────────────────────
+   REPORT MODAL OVERLAY (MOBILE OPTIMIZED)
+───────────────────────────────────────── */
+#report-modal-overlay {
+  position: fixed; inset: 0; background: rgba(240, 239, 237, 0.85); backdrop-filter: blur(8px);
+  z-index: 300; display: flex; align-items: flex-start; justify-content: center;
+  overflow-y: auto; -webkit-overflow-scrolling: touch; /* 整個透明背景負責滾動 */
+  padding: 2rem 1rem; /* 手機上下左右呼吸空間 */
+  opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+}
+#report-modal-overlay.show { opacity: 1; pointer-events: all; }
+
+.report-modal-card {
+  background: var(--card-bg); width: 100%; max-width: 600px;
+  /* 移除內部高度限制，讓卡片自然長高 */
+  border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); 
+  transform: scale(0.95) translateY(10px); transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  position: relative; border: 1px solid var(--border-soft);
+  margin: auto; /* 適應不同內容長度 */
+}
+#report-modal-overlay.show .report-modal-card { transform: scale(1) translateY(0); }
+
+/* 背景深度效果 */
+#stage.depth-blur { transform: scale(0.97); filter: blur(3px); opacity: 0.8; pointer-events: none; }
+</style>
+</head>
+<body>
+
+<div class="intent-anchor" id="global-intent">我希望<span id="anchor-text"></span></div>
+
+<div id="stage">
+
+  <div class="screen active" id="s1">
+    <div class="void-label">The Void</div>
+    <div id="floating-container"></div>
+    <div class="void-area">
+      <div class="void-input-wrap" id="void-input-block">
+        <input type="text" id="void-input" placeholder="正在煩什麼？" autocomplete="off" spellcheck="false">
+      </div>
+    </div>
+    <div class="void-bottom">
+      <button class="void-next-btn" id="void-next-step" onclick="burnIt()">夠了，我準備好面對它</button>
+    </div>
+  </div>
+
+  <div class="screen" id="s2">
+    <div class="pivot-q-wrap">
+      <p class="pivot-q-text">在這件事裡，<br>你真正想影響的是什麼？</p>
+      <div class="fill-line">
+        <span class="fill-prefix">我希望</span>
+        <span id="pivot-fill" contenteditable="true" data-placeholder="⸺" oninput="checkPivot()"></span>
+      </div>
+      <button class="pivot-next" id="pivot-next" onclick="gotoPivotNext()">繼續</button>
+      <p class="pivot-footnote">
+        衝突的核心是試圖影響他人，但對方沒有接受。<br>
+        能說出這句話，代表你已經從感受移向意圖。
+      </p>
+    </div>
+  </div>
+
+  <div class="screen" id="s3">
+    <div class="state-wrap">
+      <p class="state-q">現在，你們各自的狀態是？<span>情緒是光譜，不是非此即彼。</span></p>
+      <div class="slider-block">
+        <div class="slider-who">我的狀態</div>
+        <div class="slider-poles"><span>還在情緒裡</span><span>能清晰思考</span></div>
+        <input type="range" class="state-slider untouched" id="my-slider" min="0" max="100" value="50" oninput="updateSlider('my')">
+        <div class="slider-val" id="my-val">請點擊或滑動評估</div>
+      </div>
+      <div class="slider-block">
+        <div class="slider-who">對方的狀態</div>
+        <div class="slider-poles"><span>明顯迴避或混亂</span><span>看起來平穩</span></div>
+        <input type="range" class="state-slider untouched" id="other-slider" min="0" max="100" value="50" oninput="updateSlider('other')">
+        <div class="slider-val" id="other-val">請點擊或滑動評估</div>
+      </div>
+      <button class="state-next" id="state-next-btn" onclick="evaluateGate()">看結果</button>
+    </div>
+  </div>
+
+  <div class="screen" id="s4a">
+    <div class="gate-wrap">
+      <div class="gate-mark">◎</div>
+      <h2 class="gate-title">可以進入關係分析了</h2>
+      <p class="gate-body">雙方狀態都相對穩定。<br>這是進行關係定性的好時機。</p>
+      <div class="intent-strip">
+        <div class="intent-label">你的意圖</div>
+        <div class="intent-text" id="intent-display"></div>
+      </div>
+      <button class="gate-cta" onclick="gotoScreen(5)">進入關係定性 →</button>
+    </div>
+  </div>
+
+  <div class="screen" id="s4b">
+    <div class="caution-wrap">
+      <div class="caution-icon">☕</div>
+      <h2 class="caution-title">先讓自己緩一緩</h2>
+      <p class="caution-body" id="caution-body"></p>
+      <p class="caution-wisdom">停下來不是認輸，<br>是等一個能真正溝通的時機。</p>
+      <button class="caution-rest" onclick="location.reload()">好，先放著</button>
+      <button class="caution-force" onclick="gotoScreen(5)">我了解，還是繼續分析</button>
+    </div>
+  </div>
+
+  <div class="screen" id="s5">
+    <div class="wall-wrap">
+      <div class="wall-intent-quote">「我希望<span id="wall-intent-text"></span>」</div>
+      <p class="wall-body">
+        你的意圖很明確。<br>
+        但要將它傳遞過去，中間有一面由<span>「關係結構」</span>砌成的牆。<br><br>
+        接下來的三個問題，不是要評斷對錯，<br>
+        而是要幫你客觀量測這面牆的<span>材質與厚度</span>。
+      </p>
+      <button class="action-btn-primary" style="max-width: 200px; margin: 0 auto;" onclick="startNavigator()">開始量測牆面</button>
+    </div>
+  </div>
+
+  <div class="screen scrollable" id="s6">
+    <div class="nav-wrap">
+      
+      <div class="q-card" id="q-power-block">
+        <div class="q-title">第一層結構：資源與決策的傾斜度</div>
+        <div class="q-hint">這只是客觀狀態，隨時可以流動。看這件事中誰掌握資源或最終決策權。</div>
+        <div class="q-opts">
+          <button class="q-btn" onclick="pickQ('power','down',this)">下位<br><span style="font-size:11px;opacity:0.7">對方有決策權</span></button>
+          <button class="q-btn" onclick="pickQ('power','peer',this)">平級<br><span style="font-size:11px;opacity:0.7">相互制衡</span></button>
+          <button class="q-btn" onclick="pickQ('power','up',this)">上位<br><span style="font-size:11px;opacity:0.7">我有決策權</span></button>
+        </div>
+      </div>
+
+      <div class="q-card" id="q-goal-block">
+        <div class="q-title">第二層結構：互動的原始驅動力</div>
+        <div class="q-hint">雙方是為了各自的具體利益，還是目標本來就綁在一起？</div>
+        <div class="q-opts">
+          <button class="q-btn" onclick="pickQ('goal','trans',this)">工具性<br><span style="font-size:11px;opacity:0.7">各有所圖</span></button>
+          <button class="q-btn" onclick="pickQ('goal','comm',this)">共享性<br><span style="font-size:11px;opacity:0.7">目標一體</span></button>
+        </div>
+      </div>
+
+      <div class="q-card" id="q-role-block">
+        <div class="q-title">第三層結構：關係的邊界規範</div>
+        <div class="q-hint">是否有職銜、合約、或明確的角色定義在場？</div>
+        <div class="q-opts">
+          <button class="q-btn" onclick="pickQ('role','formal',this)">正式<br><span style="font-size:11px;opacity:0.7">有角色與規範</span></button>
+          <button class="q-btn" onclick="pickQ('role','informal',this)">非正式<br><span style="font-size:11px;opacity:0.7">私人、無明文</span></button>
+        </div>
+      </div>
+
+      <div id="s6-next" style="margin-top: 1rem;">
+        <button class="action-btn-primary" onclick="gotoMatrix()">完成結構量測，評估溫度 →</button>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="screen scrollable" id="s7">
+    <div class="nav-wrap">
+      
+      <div class="context-bar" id="context-bar"></div>
+      
+      <div style="font-size:14px; color:var(--text-sub); margin-bottom:16px; line-height:1.6; text-align:center;">
+        在收縮後的地形上，點擊矩陣中最符合的格子<br>定位你們目前的信任與親疏溫度
+      </div>
+      
+      <div class="matrix-wrap">
+        <div class="matrix-label-row">
+          <div></div>
+          <div class="axis-label">低信任<br><span style="font-size:11px;opacity:.7">預設我有隱藏動機</span></div>
+          <div class="axis-label">條件信任<br><span style="font-size:11px;opacity:.7">聽其言觀其行</span></div>
+          <div class="axis-label">高信任<br><span style="font-size:11px;opacity:.7">預設我無惡意</span></div>
+        </div>
+        <div class="matrix-row">
+          <div class="row-label">親近<br>強連結</div>
+          <div class="cell" onclick="pickCell('close','low',this)">
+            <div class="cell-title">破裂後的親密</div>
+            <div class="cell-sub">曾信任、現受傷。最難修復的地形</div>
+          </div>
+          <div class="cell" onclick="pickCell('close','cond',this)">
+            <div class="cell-title">深厚但審慎</div>
+            <div class="cell-sub">情感深厚，但對方在觀察你的一致性</div>
+          </div>
+          <div class="cell" onclick="pickCell('close','high',this)">
+            <div class="cell-title">完全開放</div>
+            <div class="cell-sub">最自由的地形，直言才是最強武器</div>
+          </div>
+        </div>
+        <div class="matrix-row">
+          <div class="row-label">中立<br>弱連結</div>
+          <div class="cell" onclick="pickCell('neutral','low',this)">
+            <div class="cell-title">陌生且警戒</div>
+            <div class="cell-sub">有特定原因不信任你，需先釐清</div>
+          </div>
+          <div class="cell" onclick="pickCell('neutral','cond',this)">
+            <div class="cell-title">標準職場地形</div>
+            <div class="cell-sub">大多數同事關係的起點</div>
+          </div>
+          <div class="cell" onclick="pickCell('neutral','high',this)">
+            <div class="cell-title">自然開放的陌生人</div>
+            <div class="cell-sub">對方友善，影響力通道暢通</div>
+          </div>
+        </div>
+        <div class="matrix-row">
+          <div class="row-label">疏遠<br>零連結</div>
+          <div class="cell" onclick="pickCell('distant','low',this)">
+            <div class="cell-title">最危險的地形</div>
+            <div class="cell-sub">雙重防禦。任何訴求都被視為入侵</div>
+          </div>
+          <div class="cell" onclick="pickCell('distant','cond',this)">
+            <div class="cell-title">初次接觸</div>
+            <div class="cell-sub">典型的冷陌生人，需從可信任性建起</div>
+          </div>
+          <div class="cell" onclick="pickCell('distant','high',this)">
+            <div class="cell-title">開放的陌生人</div>
+            <div class="cell-sub">對方友善但沒有交集</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="report-modal-overlay">
+  <div class="report-modal-card" id="result-container">
+  </div>
+</div>
+
+<div id="ink-overlay">
+  <div class="ink-msg" id="ink-msg">⸺</div>
+</div>
+
+<script>
+/* ── State Management ── */
+const app = { 
+  pivotText: '', 
+  myVal: 50, 
+  otherVal: 50,
+  nav: { power: null, goal: null, role: null, prox: null, trust: null }
+};
+
+const CTX = {
+  power: { down: '下位', peer: '平級', up: '上位' },
+  goal: { trans: '工具性', comm: '共享性' },
+  role: { formal: '正式邊界', informal: '非正式邊界' },
+};
+
+/* ── PRELUDE LOGIC ── */
+(function () {
+  const placeholders = ["正在煩什麼？", "讓它先出來。", "這裡很安全。", "沒有人在看。", "把沉重的一句話拋出來。"];
+  let cur = 0;
+  const input = document.getElementById('void-input');
+  setInterval(() => {
+    if (input && input.value.length === 0) {
+      cur = (cur + 1) % placeholders.length;
+      input.placeholder = placeholders[cur];
+    }
+  }, 2800);
+})();
+
+const floatingPhrasesQueue = [];
+const MAX_FLOATING = 6; 
+
+document.getElementById('void-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    const val = this.value.trim();
+    if (val.length > 0) {
+      createFloatingPhrase(val);
+      this.value = '';
+      document.getElementById('void-next-step').classList.add('visible');
+    }
+  }
+});
+
+function createFloatingPhrase(text) {
+  const container = document.getElementById('floating-container');
+  const el = document.createElement('div');
+  el.className = 'floating-phrase';
+  el.textContent = text;
+  const left = Math.random() * 60 + 12;
+  const top = Math.random() * 45 + 18;  
+  const baseRot = (Math.random() * 6 - 3);  
+  const driftX = (Math.random() * 40 - 20); 
+  const driftY = (Math.random() * 40 - 30); 
+  const targetRot = baseRot + (Math.random() * 4 - 2);
+
+  el.style.left = `${left}%`; el.style.top = `${top}%`;
+  el.style.setProperty('--base-rot', `${baseRot}deg`);
+  el.style.setProperty('--drift-x', `${driftX}px`);
+  el.style.setProperty('--drift-y', `${driftY}px`);
+  el.style.setProperty('--target-rot', `${targetRot}deg`);
+  el.style.opacity = '0';
+  container.appendChild(el);
+  
+  el.getBoundingClientRect();
+  el.style.opacity = '0.75';
+  floatingPhrasesQueue.push(el);
+
+  if (floatingPhrasesQueue.length > MAX_FLOATING) {
+    const oldest = floatingPhrasesQueue.shift();
+    oldest.classList.add('fade-out');
+    setTimeout(() => { oldest.remove(); }, 1200);
+  }
+}
+
+function burnIt() {
+  const overlay = document.getElementById('ink-overlay');
+  document.querySelectorAll('.floating-phrase').forEach(el => el.classList.add('fade-out'));
+  document.getElementById('void-input-block').style.opacity = '0';
+  document.getElementById('void-next-step').style.opacity = '0';
+  
+  overlay.classList.add('show');
+  setTimeout(() => overlay.classList.add('transition-bg'), 100);
+
+  for (let i = 0; i < 12; i++) {
+    const p = document.createElement('div');
+    p.className = 'ink-particle';
+    const size = 40 + Math.random() * 80;
+    p.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*.6}s;animation-duration:${1.6+Math.random()*.8}s`;
+    overlay.appendChild(p);
+  }
+  
+  const msgs = ['⸺','◦','  ']; let i = 0;
+  const t = setInterval(() => { document.getElementById('ink-msg').textContent = msgs[i++ % msgs.length]; }, 500);
+
+  setTimeout(() => { clearInterval(t); document.getElementById('ink-msg').textContent = '✓'; }, 1800);
+  setTimeout(() => { 
+      overlay.classList.remove('show'); overlay.classList.remove('transition-bg');
+      overlay.querySelectorAll('.ink-particle').forEach(p=>p.remove()); 
+      gotoScreen(2); 
+  }, 2600);
+}
+
+function checkPivot() {
+  const v = document.getElementById('pivot-fill').textContent.trim();
+  app.pivotText = v;
+  const btn = document.getElementById('pivot-next');
+  if (v.length > 4) btn.classList.add('ready'); else btn.classList.remove('ready');
+}
+
+function gotoPivotNext() {
+  if (!app.pivotText) return;
+  gotoScreen(3);
+}
+
+const sliderLabels = {
+  my: ['還在情緒漩渦裡', '有點混亂，但還好', '說不上來', '大致平靜', '相當清晰'],
+  other: ['明顯在迴避或爆發', '情緒有些起伏', '難以判斷', '看起來還好', '狀態相當平穩'],
+};
+let slidersTouched = { my: false, other: false };
+
+function updateSlider(who) {
+  const slider = document.getElementById(who+'-slider');
+  const v = parseInt(slider.value);
+  app[who+'Val'] = v;
+  const idx = Math.min(4, Math.floor(v / 20));
+  slidersTouched[who] = true;
+  slider.classList.remove('untouched');
+  document.getElementById(who+'-val').textContent = sliderLabels[who][idx];
+
+  if (slidersTouched.my && slidersTouched.other) {
+    document.getElementById('state-next-btn').classList.add('ready');
+  }
+}
+
+function evaluateGate() {
+  const myOk    = app.myVal >= 55;
+  const otherOk = app.otherVal >= 55;
+  
+  document.getElementById('intent-display').textContent = '我希望' + (app.pivotText || '⸺');
+  document.getElementById('wall-intent-text').textContent = app.pivotText;
+  document.getElementById('anchor-text').textContent = app.pivotText;
+
+  if (myOk && otherOk) {
+    gotoScreen('4a');
+  } else {
+    let body = '';
+    if (!myOk && !otherOk) body = '你和對方目前都不在狀態。此刻進行的對話，往往不是真正的溝通，而是兩個防禦機制在互相碰撞。現在做的任何分析，可能都帶著情緒的雜訊。';
+    else if (!myOk) body = '你現在還在情緒裡，這很正常。只是此刻填入的判斷容易失真——你對「親疏」與「信任」的感受，會被當下的狀態放大或縮小。';
+    else body = '對方目前狀態不穩定。就算你分析得再精準，對方的防禦機制也會讓訊息折損。策略要等對方能接收的時候才有意義。';
+    document.getElementById('caution-body').textContent = body;
+    gotoScreen('4b');
+  }
+}
+
+/* ── Screen Transitions ── */
+function gotoScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById('s' + id);
+  if (el) setTimeout(() => el.classList.add('active'), 30);
+  
+  const bg = { 1: '#0e0e10', 2: '#faf9f7', 3: '#f5f4f1', '4a': '#f7faf7', '4b': '#faf8f4' };
+  document.getElementById('stage').style.background = bg[id] || 'var(--nav-bg)';
+  
+  setTimeout(() => {
+    document.getElementById('stage').scrollTo(0, 0);
+  }, 300);
+
+  // Handle Intent Anchor Visibility
+  const anchor = document.getElementById('global-intent');
+  if (id === 6 || id === 7) {
+    anchor.classList.add('visible');
+  } else {
+    anchor.classList.remove('visible');
+  }
+}
+
+/* ── NAVIGATOR LOGIC ── */
+function startNavigator() {
+  gotoScreen(6);
+}
+
+function pickQ(dim, val, btn) {
+  app.nav[dim] = val;
+  btn.closest('.q-opts').querySelectorAll('.q-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  
+  if (dim === 'power') {
+    const nextBlock = document.getElementById('q-goal-block');
+    nextBlock.style.display = 'block';
+    setTimeout(() => nextBlock.scrollIntoView({behavior: 'smooth', block: 'center'}), 150);
+  }
+  if (dim === 'goal') {
+    const nextBlock = document.getElementById('q-role-block');
+    nextBlock.style.display = 'block';
+    setTimeout(() => nextBlock.scrollIntoView({behavior: 'smooth', block: 'center'}), 150);
+  }
+  if (dim === 'role') {
+    const nextBlock = document.getElementById('s6-next');
+    nextBlock.style.display = 'block';
+    setTimeout(() => nextBlock.scrollIntoView({behavior: 'smooth', block: 'end'}), 150);
+  }
+}
+
+function gotoMatrix() {
+  const bar = document.getElementById('context-bar');
+  bar.innerHTML = `結構量測結果：<span>${CTX.power[app.nav.power]}</span> · <span>${CTX.goal[app.nav.goal]}</span> · <span>${CTX.role[app.nav.role]}</span>`;
+  gotoScreen(7);
+}
+
+const STRATS = {
+  power: {
+    down: {add:['互惠原則（先給予）','專家權威','側翼引導'], avoid:['命令語氣','直接施壓']},
+    peer: {add:['社會認同','承諾一致性（小請求先行）'], avoid:['居高臨下框架']},
+    up:   {add:['清晰績效框架','直接授權','願景溝通'], avoid:['倚仗職位（產生表面服從）']},
+  },
+  goal: {
+    trans:{add:['價值展示','損失規避（說明不合作的損失）'], avoid:['情感包裝','願景描繪']},
+    comm: {add:['「我們」共同體語言','長遠意義強調'], avoid:['純利益計算語言']},
+  },
+  role: {
+    formal:  {add:['客觀數據','行業標準參照','合規邏輯'], avoid:['過度親暱','拍肩等非正式舉動']},
+    informal:{add:['好感原則','真誠讚美','自我揭露'], avoid:['僵化邏輯推演']},
+  },
+  matrix: {
+    'close-high':  {add:['直言不諱','共同願景','直接點出問題核心'], avoid:['套路話術'], core:'直話直說是最強的武器。任何技巧性操作都是在消耗珍貴的信任儲備。'},
+    'close-cond':  {add:['情感框架包裝','自我揭露','承諾一致性'], avoid:['冰冷的利益計算語言'], core:'情感通道暢通，但對方在用一致性衡量你。每一個說到做到都是在存款，每一個失諾都在提款。'},
+    'close-low':   {add:['極端透明化','極小步可驗證承諾'], avoid:['大願景','隱晦操作','情感施壓'], core:'最脆弱的地形。曾有過深度連結，現在卻存在裂痕。唯有極端透明，且不求立刻原諒。'},
+    'neutral-high':{add:['好感原則','社會認同','直接訴求'], avoid:['過於繁複的鋪墊'], core:'摩擦係數低，對方已預設你是可信的。可以相對直接地表達需求，不需要大量的破冰。'},
+    'neutral-cond':{add:['價值展示先行','微型互惠','可預測性建立'], avoid:['交淺言深','情感訴求'], core:'這是最常見的起點，也是最需要「耐心投資」的地形。每一次可預測的互動都在積累通行證。'},
+    'neutral-low': {add:['先釐清低信任的原因','極端透明化','極小步測試'], avoid:['任何大請求','情感訴求'], core:'中立＋低信任代表有特定原因讓對方對你有防禦。第一步不是影響，而是診斷：究竟是什麼讓對方警戒？'},
+    'distant-high':{add:['直接說明來意','好感原則','社會認同'], avoid:['過多鋪墊'], core:'對方對你一無所知但友善開放。來意清晰、態度誠懇就足夠了。不需要任何複雜的破冰。'},
+    'distant-cond':{add:['客觀認同','第三方背書','微型互惠'], avoid:['情感訴求','交淺言深'], core:'初次接觸的標準地形。你的可預測性是唯一的資產。先給，再要；先建立安全感，再有任何索求。'},
+    'distant-low': {add:['極端透明化','承諾一致性'], avoid:['情感訴求','願景框架','任何索取'], core:'最危險的交叉點。低信任代表對方有先入為主的防禦。第一個任務不是影響，是讓對方感到「你是可預測的、無威脅的」。'},
+  },
+};
+
+const CONFLICT_CHECKS = [
+  {check:()=>app.nav.goal==='trans'&&app.nav.prox==='close', msg:'衝突：對親近的人用工具性語言，會將共享關係降級為商業關係。'},
+  {check:()=>app.nav.trust==='low'&&app.nav.goal==='comm', msg:'衝突：「我們」框架在低信任環境中會被解讀為操弄。必須先建立基本信任。'},
+  {check:()=>app.nav.power==='down'&&app.nav.trust==='low', msg:'雙重逆風：下位＋低信任。唯一路徑是慢慢用可驗證的極小步骤重建信用。'},
+];
+
+function pickCell(prox, trust, el) {
+  document.querySelectorAll('.cell').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  app.nav.prox = prox; app.nav.trust = trust;
+  renderResult();
+}
+
+function renderResult() {
+  const overlay = document.getElementById('report-modal-overlay');
+  const pContainer = document.getElementById('result-container');
+  const stage = document.getElementById('stage');
+  
+  const key = `${app.nav.prox}-${app.nav.trust}`;
+  const ms = STRATS.matrix[key];
+  let adds = new Set(ms.add);
+  let avoids = new Set(ms.avoid);
+  
+  [app.nav.power, app.nav.goal, app.nav.role].forEach((v, i) => {
+    const dim = ['power','goal','role'][i];
+    STRATS[dim][v].add.forEach(x => adds.add(x));
+    STRATS[dim][v].avoid.forEach(x => avoids.add(x));
+  });
+  
+  const conflicts = CONFLICT_CHECKS.filter(c => c.check());
+  const proxLabel = {close:'親近',neutral:'中立',distant:'疏遠'}[app.nav.prox];
+  const trustLabel = {high:'高信任',cond:'條件信任',low:'低信任'}[app.nav.trust];
+  const powerLabel = CTX.power[app.nav.power];
+  const goalLabel = CTX.goal[app.nav.goal];
+  const roleLabel = CTX.role[app.nav.role];
+
+  const promptText = `請扮演一位深諳人際動力的「溝通幕僚」。我現在面臨一個溝通挑戰，請根據我透過系統量測出的「客觀關係邊界」與「心理地形」，為我提供策略切入點。
+
+【我的核心意圖】
+我希望對方能夠：${app.pivotText}
+
+【系統量測出的客觀關係邊界】
+- 資源與決策權：${powerLabel}
+- 互動的原始動力：${goalLabel}
+- 關係的邊界規範：${roleLabel}
+- 我們的情感距離：${proxLabel}
+- 目前的信任基礎：${trustLabel}
+- 雙方情緒狀態：我的狀態（${app.myVal}/100），對方的狀態（${app.otherVal}/100）
+
+【幕僚作業的安全邊界】
+- 地形核心洞察：${ms.core}
+- ✅ 建議納入的溝通機制：${[...adds].join('、')}
+- 🚫 容易引起防禦的盲區：${[...avoids].join('、')}${conflicts.length ? `\n- ⚠️ 潛在結構衝突：${conflicts.map(c=>c.msg).join('；')}` : ''}
+
+【你的任務】
+⚠️ 幕僚守則：請絕對不要進行「假設性的完美沙盤推演」，也不要使用「保證有效」或教導式的傲慢口吻。我不需要不切實際的對話劇本，請直接為我整理「我可以嘗試的思考框架」，把最終的判斷與選擇權交還給我。
+
+請產出以下內容：
+1. 【開場定調】：基於目前的信任度與雙方情緒，開場可以用什麼樣的姿態來安全破冰？（請給出 2 種不同氛圍的對話起手式範例）
+2. 【三個維度的切入點提案 (Angles)】：根據上述「建議納入的溝通機制」，為我構思 3 種不同視角的切入點。請客觀說明「這個切入點背後的策略意圖與心理動力是什麼」，供我自行評估最適合目前局勢的做法。
+3. 【互動節奏建議】：在這個特定地形下，提出想法後我應該拿捏什麼樣的節奏？（例如：適合推進確認，還是應該主動留白、降低壓力？）
+4. 【動態微調提醒】：結尾請用一句話提醒我，正式開口時可以根據對方的哪些「即時微表情或反應」來隨機應變。`;
+
+  pContainer.innerHTML = `
+    <div style="padding: 1rem 0.5rem;"> 
+      <div class="result-head" style="font-size:24px;">策略輸出報告</div>
+      
+      <div style="background:var(--nav-bg); padding:16px; border-radius:8px; border:1px solid var(--border-soft); margin:16px 0 24px;">
+        <div style="font-size:12px; color:var(--text-sub); letter-spacing:0.1em; margin-bottom:8px;">🎯 你的核心意圖</div>
+        <div style="font-family:var(--serif); font-size:16px; font-weight:600; color:var(--accent-warm); margin-bottom:16px;">「我希望 ${app.pivotText}」</div>
+        
+        <div style="font-size:12px; color:var(--text-sub); letter-spacing:0.1em; margin-bottom:8px;">🧱 客觀關係邊界</div>
+        <div style="font-size:14px; font-weight:500; margin-bottom:16px;">${powerLabel} · ${goalLabel} · ${roleLabel}</div>
+        
+        <div style="font-size:12px; color:var(--text-sub); letter-spacing:0.1em; margin-bottom:8px;">🗺️ 心理地形評估</div>
+        <div style="font-size:14px; font-weight:500;">${proxLabel}的距離 × ${trustLabel}的基礎</div>
+      </div>
+
+      <div class="core-insight"><strong>地形核心洞察：</strong><br>${ms.core}</div>
+      
+      <div class="section-label">✅ 破防機制（建議納入）</div>
+      <div class="tag-row">${[...adds].map(x=>`<span class="tag tag-g">${x}</span>`).join('')}</div>
+      
+      <div class="section-label">🚫 防禦雷區（絕對避免）</div>
+      <div class="tag-row">${[...avoids].map(x=>`<span class="tag tag-w">${x}</span>`).join('')}</div>
+      
+      ${conflicts.length ? `<div class="divider"></div><div class="section-label">⚠️ 結構衝突警告</div>${conflicts.map(c=>`<div style="font-size:13px;color:#8e6c45;background:#fdfaf0;border:1px solid #e0d5c1;border-radius:8px;padding:10px 12px;margin-bottom:8px"><strong>注意：</strong>${c.msg}</div>`).join('')}` : ''}
+      
+      <div class="divider"></div>
+      
+      <div class="section-label" style="display:flex; align-items:center; gap:6px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a2 2 0 0 1 2 2c0 1.1-.9 2-2 2s-2-.9-2-2a2 2 0 0 1 2-2z"/><path d="M19 14v4a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-4"/><path d="M12 14v8"/><path d="M5 10c0-1.1.9-2 2-2h10a2 2 0 0 1 2 2v4H5v-4z"/></svg>
+        AI 專屬幕僚提示詞
+      </div>
+      <div style="font-size:13px; color:var(--text-sub); margin-bottom:12px; line-height:1.5;">
+        我們已為你封裝好現有局勢。請複製以下提示詞並貼給 ChatGPT 或 Claude，獲取專屬的溝通切入點。
+      </div>
+      
+      <div style="position:relative; background:#fbfbfb; border:1px solid var(--border-soft); border-radius:8px; padding:16px; margin-bottom:16px; overflow:hidden; max-height:140px; box-shadow:inset 0 2px 4px rgba(0,0,0,0.01);">
+        <div style="font-size:12px; color:#777; line-height:1.6; font-family:monospace; white-space:pre-wrap;">${promptText}</div>
+        <div style="position:absolute; bottom:0; left:0; right:0; height:60px; background:linear-gradient(to bottom, rgba(251,251,251,0), rgba(251,251,251,1)); pointer-events:none;"></div>
+      </div>
+      
+      <button class="action-btn-primary" id="copy-prompt-btn" style="display:flex; align-items:center; justify-content:center; gap:8px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+        複製幕僚提示詞
+      </button>
+      
+      <button class="action-btn-secondary" style="width:100%; margin-top:32px; padding:14px; font-weight:600;" onclick="closeReportModal()">
+        返回地形矩陣
+      </button>
+    </div>`;
+
+  document.getElementById('copy-prompt-btn').onclick = function() {
+    const btn = this;
+    if(navigator.clipboard) {
+      navigator.clipboard.writeText(promptText).then(() => {
+        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> 已成功複製！`;
+        btn.style.background = '#4a6c52'; 
+        setTimeout(() => {
+          btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> 複製幕僚提示詞`;
+          btn.style.background = 'var(--text-main)';
+        }, 3000);
+      });
+    } else {
+      prompt("請手動複製以下提示詞：", promptText);
+    }
+  };
+
+  stage.classList.add('depth-blur');
+  overlay.classList.add('show');
+}
+
+function closeReportModal() {
+  const overlay = document.getElementById('report-modal-overlay');
+  const stage = document.getElementById('stage');
+  
+  overlay.classList.remove('show');
+  stage.classList.remove('depth-blur');
+  
+  setTimeout(() => {
+    document.getElementById('result-container').innerHTML = '';
+  }, 400); 
+}
+</script>
+</body>
+</html>
