@@ -1,7 +1,7 @@
 {
-  "name": "chime",
-  "short_name": "洽鳴",
-  "description": "在融洽的溝通中，碰撞出同步的共鳴",
+  "name": "Align",
+  "short_name": "齊點",
+  "description": "給情緒一點空間，給共識一個起點...",
   "start_url": "./Navigate_final.html",
   "display": "standalone",
   "orientation": "portrait",
