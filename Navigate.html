@@ -110,7 +110,7 @@ html, body {
 .pivot-next { font-family: var(--sans); font-size: 12px; letter-spacing: .1em; color: rgba(26,26,26,.0); background: none; border: none; cursor: pointer; text-transform: uppercase; margin-top: 3rem; transition: color .4s ease; display: block; width: 100%; text-align: center; animation: riseIn 1.4s ease both; pointer-events: none; }
 .pivot-next.ready { color: rgba(26,26,26,.45); pointer-events: all; }
 .pivot-next.ready:hover { color: rgba(26,26,26,.85); }
-.pivot-footnote { font-family: var(--sans); font-size: 12px; color: #bbb; line-height: 1.6; text-align: center; max-width: 340px; margin-top: 4rem; margin-inline: auto; animation: riseIn 1.8s ease both; }
+.pivot-footnote { font-family: var(--sans); font-size: 12px; color: #bbb; line-height: 1.6; text-align: center; max-width: 280px; margin-top: 4rem; margin-inline: auto; animation: riseIn 1.8s ease both; }
 
 /* ─────────────────────────────────────────
    SCREEN 3 — STATE SLIDERS
@@ -302,7 +302,8 @@ body.light-ui #global-menu-btn:hover { color: rgba(0,0,0,0.6); }
 }
 .menu-brand { font-family: var(--serif); font-size: 18px; font-weight: 600; color: var(--text-main); margin-bottom: 4px; }
 .menu-title { font-family: var(--sans); font-size: 12px; font-weight: 500; color: var(--accent-warm); letter-spacing: 0.05em; margin-bottom: 16px; text-transform: uppercase; }
-.menu-desc { font-size: 13px; color: var(--text-sub); line-height: 1.6; }
+.menu-desc { font-size: 13px; color: var(--text-sub); line-height: 1.8; text-align: center; }
+.menu-desc span { display: block; }
 
 /* ── 📱 手機版專屬優化 (響應式斷行與鍵盤防擋) ── */
 @media (max-width: 600px) {
@@ -340,7 +341,8 @@ body.light-ui #global-menu-btn:hover { color: rgba(0,0,0,0.6); }
     <div class="menu-brand">H-bot-dot</div>
     <div class="menu-title">Conflict Navigator</div>
     <div class="menu-desc">
-      這是一個結合心理學與影響力策略的自我覺察工具<br class="desktop-br">從宣洩情緒，到找回關係的主導權
+      <span>結合心理學與影響力策略的自我覺察工具</span>
+      <span>從宣洩情緒，到找回關係的主導權</span>
     </div>
   </div>
 </div>
@@ -370,14 +372,14 @@ body.light-ui #global-menu-btn:hover { color: rgba(0,0,0,0.6); }
       <button class="pivot-next" id="pivot-next" onclick="gotoPivotNext()">繼續</button>
       
       <p class="pivot-footnote">
-        很多人只是一直感受，沒有辦法說出想要什麼<br class="desktop-br">能說出這句話，代表你已經從感受移向意圖        
+        很多人只是一直感受，沒有辦法說出想要什麼<br>能說出來，代表你已經從感受移向意圖
       </p>
     </div>
   </div>
 
   <div class="screen" id="s3">
     <div class="state-wrap">
-      <p class="state-q">現在，你們各自的狀態是？<span>情緒是光譜，不是非此即彼。</span></p>
+      <p class="state-q">現在，你們各自的狀態是？<span>情緒是光譜，不是非此即彼</span></p>
       <div class="slider-block">
         <div class="slider-who">我的狀態</div>
         <div class="slider-poles"><span>還在情緒裡</span><span>能清晰思考</span></div>
@@ -398,7 +400,7 @@ body.light-ui #global-menu-btn:hover { color: rgba(0,0,0,0.6); }
     <div class="gate-wrap">
       <div class="gate-mark">◎</div>
       <h2 class="gate-title">可以進入關係分析了</h2>
-      <p class="gate-body">雙方狀態都相對穩定。<br class="desktop-br">這是進行關係定性的好時機。</p>
+      <p class="gate-body">雙方狀態都相對穩定<br class="desktop-br">這是進行關係定性的好時機</p>
       <div class="intent-strip">
         <div class="intent-label">你的意圖</div>
         <div class="intent-text" id="intent-display"></div>
@@ -412,7 +414,7 @@ body.light-ui #global-menu-btn:hover { color: rgba(0,0,0,0.6); }
       <div class="caution-icon">☕</div>
       <h2 class="caution-title">先讓自己緩一緩</h2>
       <p class="caution-body" id="caution-body"></p>
-      <p class="caution-wisdom">停下來不是認輸，<br class="desktop-br">是等一個能真正溝通的時機。</p>
+      <p class="caution-wisdom">停下來不是認輸，<br class="desktop-br">是等一個能真正溝通的時機</p>
       <button class="caution-rest" onclick="restartApp()">好，先放著</button>
       <button class="caution-force" onclick="gotoScreen(5)">我了解，還是繼續分析</button>
     </div>
@@ -422,8 +424,8 @@ body.light-ui #global-menu-btn:hover { color: rgba(0,0,0,0.6); }
     <div class="wall-wrap">
       <div class="wall-intent-quote">「我希望<span id="wall-intent-text"></span>」</div>
       <div class="wall-body">
-        <p style="margin-bottom: 1.5rem;">你的意圖很明確，<br class="desktop-br">但要將它傳遞過去，中間有一面由<span>「關係結構」</span>砌成的牆</p>
-        <p>接下來的三個問題不是要評斷對錯<br class="desktop-br">而是要幫你客觀量測這面牆的<span>材質與厚度</span></p>
+        <p style="margin-bottom: 1.5rem;">你的意圖很明確<br>但要將它傳遞過去<br>中間有一面由<span>「關係結構」</span>砌成的牆</p>
+        <p>接下來的三個問題不是要評斷對錯<br>而是幫你量測這面牆的<span>材質與厚度</span></p>
       </div>
       <button class="action-btn-primary" style="max-width: 200px; margin: 0 auto;" onclick="startNavigator()">開始量測牆面</button>
     </div>
