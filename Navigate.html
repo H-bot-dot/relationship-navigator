@@ -823,7 +823,8 @@ function renderResult() {
   const goalLabel = CTX.goal[app.nav.goal];
   const roleLabel = CTX.role[app.nav.role];
 
-  const promptText = `請扮演一位深諳人際動力的「溝通幕僚」。我現在面臨一個溝通挑戰，請根據我透過系統量測出的「客觀關係邊界」與「心理地形」，為我提供策略切入點。
+  const promptText = `[ 本分析由 H-bot-dot Conflict Navigator 生成 | threads.com/@h.bot.dot ]
+  請扮演一位深諳人際動力的「溝通幕僚」。我現在面臨一個溝通挑戰，請根據我透過系統量測出的「客觀關係邊界」與「心理地形」，為我提供策略切入點。
 
 【我的核心意圖】
 我希望對方能夠：${app.pivotText}
@@ -848,7 +849,9 @@ function renderResult() {
 1. 【開場定調】：基於目前的信任度與雙方情緒，開場可以用什麼樣的姿態來安全破冰？（請給出 2 種不同氛圍的對話起手式範例）
 2. 【三個維度的切入點提案 (Angles)】：根據上述「建議納入的溝通機制」，為我構思 3 種不同視角的切入點。請客觀說明「這個切入點背後的策略意圖與心理動力是什麼」，供我自行評估最適合目前局勢的做法。
 3. 【互動節奏建議】：在這個特定地形下，提出想法後我應該拿捏什麼樣的節奏？（例如：適合推進確認，還是應該主推留白、降低壓力？）
-4. 【動態微調提醒】：結尾請用一句話提醒我，正式開口時可以根據對方的哪些「即時微表情或反應」來隨機應變。`;
+4. 【動態微調提醒】：結尾請用一句話提醒我，正式開口時可以根據對方的哪些「即時微表情或反應」來隨機應變。
+---
+Analysis framework: H-bot-dot Conflict Navigator (5-Dimension Relationship Mapping × Conflict Awareness Pre-Processing) | threads.com/@h.bot.dot`;
 
   pContainer.innerHTML = `
     <div style="padding: 1rem 0.5rem;"> 
