@@ -1,5 +1,5 @@
 // ⚡ 升級版本號，強制瀏覽器更新快取
-const CACHE = 'conflict-navigator-v2'; 
+const CACHE = 'conflict-navigator-v3'; 
 
 // 🎯 精準對齊你專案中的所有實體檔案
 const ASSETS = [
