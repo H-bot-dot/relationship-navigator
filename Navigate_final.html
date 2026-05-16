@@ -105,40 +105,58 @@ html, body {
 /* ─────────────────────────────────────────
    ⚡ LOADING ANIMATION: ALIGN (波紋 Bug 修正版)
 ───────────────────────────────────────── */
-/* 圓環樣式優化：快速點亮，優雅淡出 */
+/* 圓環樣式優化：保持 1px 極細邊框，修正粗線與閃頻 */
 .align-pulse {
   position: absolute; 
-  /* 基礎尺寸對齊原本的 16x16 */
-  width: 16px; height: 16px; border-radius: 50%;
-  border: 1px solid var(--accent-warm);
-  opacity: 0; /* 基礎狀態設為透明 */
-  
-  /* 改用 scale() 並優化時間與緩動函數 */
+  /* 必須使用絕對置中，讓寬高改變時能確保從正中心完美擴散 */
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px solid var(--accent-warm); /* 永遠保持 1px 的精緻感 */
+  opacity: 0; 
   animation: alignWave 1.8s 2.5s infinite cubic-bezier(0.4, 0, 0.6, 1);
 }
 /* 載入文案（配合語意斷行） */
 .load-msg { text-align: center; color: rgba(255,255,255,0.4); font-family: var(--serif); font-size: 15px; font-weight: 300; line-height: 1.8; margin-bottom: 2rem; }
 .desktop-br { display: block; }
 @media (max-width: 600px) { .desktop-br { display: none; } }
+* 載入動畫關鍵影格 @keyframes */
 
-/* 波紋關鍵影格優化：徹底消滅最後的實體粗線 */
+@keyframes disksApproach1 {
+
+  0% { transform: translate(-100px, -60px) rotate(-15deg); }
+
+  100% { transform: translate(-28px, 0) rotate(0); border-color: rgba(200, 169, 122, 0.6); background: radial-gradient(circle, rgba(200,169,122,0.1) 0%, rgba(200,169,122,0.05) 100%); }
+
+}
+
+@keyframes disksApproach2 {
+
+  0% { transform: translate(100px, 60px) rotate(15deg); }
+
+  100% { transform: translate(28px, 0) rotate(0); border-color: rgba(200, 169, 122, 0.6); background: radial-gradient(circle, rgba(200,169,122,0.1) 0%, rgba(200,169,122,0.05) 100%); }
+
+}
+
+@keyframes coreIgnite { 0% { opacity: 0; } 100% { opacity: 1; } }
+
+@keyframes corePulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.9; } }
+/* 波紋關鍵影格：優雅淡入淡出，不使用 scale 避免邊框變粗 */
 @keyframes alignWave {
   0% {
-    transform: scale(1);
+    width: 16px; height: 16px;
     opacity: 0;
   }
   10% {
-    opacity: 0.7; 
+    opacity: 0.7; /* 快速亮起，解決閃頻 */
   }
   70% {
-    opacity: 0.2; 
+    opacity: 0.2; /* 提早開始變暗 */
   }
   100% {
-    transform: scale(11.25); /* 用 scale 取代 width/height */
-    opacity: 0; /* 徹底消失，保證無殘影 */
+    width: 180px; height: 180px;
+    opacity: 0; /* 在抵達最外圈時徹底消失，保證無殘影 */
   }
 }
-
 /* ─────────────────────────────────────────
    SCREEN 1 — THE VOID
 ───────────────────────────────────────── */
