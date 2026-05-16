@@ -41,12 +41,75 @@ html, body {
 }
 
 /* ── Stage container ── */
+/* ── Stage container ── */
 #stage {
   position: absolute; inset: 0; height: 100dvh;
   transition: background 1.2s ease, transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.5s ease;
   overflow-y: auto; overflow-x: hidden;
+  
+  /* 🌟 以下為新增的兩行：為了配合載入動畫，讓舞台一開始模糊隱藏 */
+  opacity: 0; filter: blur(10px); 
+}
+#stage.active { opacity: 1; filter: blur(0); }
+/* ─────────────────────────────────────────
+   ⚡ LOADING ANIMATION: ALIGN
+───────────────────────────────────────── */
+#loading-animation {
+  position: fixed; inset: 0; background: #0d0e12; 
+  z-index: 2000; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  transition: opacity 0.8s ease, visibility 0s 0.8s;
+  opacity: 1; visibility: visible;
+}
+#loading-animation.loaded { opacity: 0; visibility: hidden; }
+
+/* 幾何圓盤與共鳴波 */
+.align-elements { position: relative; width: 300px; height: 300px; display: flex; justify-content: center; align-items: center; margin-bottom: 40px;}
+
+.disk {
+  position: absolute; width: 140px; height: 140px; border-radius: 50%;
+  border: 1.5px solid rgba(230, 230, 230, 0.4);
+  background: radial-gradient(circle, rgba(220,220,220,0.1) 0%, rgba(200,200,200,0.05) 100%);
+  transition: transform 3s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 1s 2.5s, background 1s 2.5s;
 }
 
+/* 1. 工具散落與對齊軌跡 (0s -> 2.5s) */
+.disk-1 { transform: translate(-100px, -60px) rotate(-15deg); animation: disksApproach1 2.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+.disk-2 { transform: translate(100px, 60px) rotate(15deg); animation: disksApproach2 2.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+
+/* 2. 共識核心點與同頻脈衝 (2.5s 之後觸發) */
+.align-center {
+  position: absolute; inset: 0; display: grid; place-items: center; 
+  opacity: 0; animation: coreIgnite 1.5s 2.5s forwards;
+}
+.core-dot {
+  width: 16px; height: 16px; border-radius: 50%; 
+  background: #fff; box-shadow: 0 0 15px #ffcc80, 0 0 40px #ffcc80;
+  animation: corePulse 1.5s infinite alternate;
+}
+.align-pulse {
+  position: absolute; width: 16px; height: 16px; border-radius: 50%;
+  border: 1px solid var(--accent-warm); opacity: 0;
+  animation: alignWave 1.5s 2.5s infinite;
+}
+
+/* 載入文案（配合語意斷行） */
+.load-msg { text-align: center; color: rgba(255,255,255,0.4); font-family: var(--serif); font-size: 15px; font-weight: 300; line-height: 1.8; margin-bottom: 2rem; }
+.desktop-br { display: block; }
+@media (max-width: 600px) { .desktop-br { display: none; } }
+
+/* 載入動畫關鍵影格 @keyframes */
+@keyframes disksApproach1 {
+  0% { transform: translate(-100px, -60px) rotate(-15deg); }
+  100% { transform: translate(-28px, 0) rotate(0); border-color: rgba(200, 169, 122, 0.6); background: radial-gradient(circle, rgba(200,169,122,0.1) 0%, rgba(200,169,122,0.05) 100%); }
+}
+@keyframes disksApproach2 {
+  0% { transform: translate(100px, 60px) rotate(15deg); }
+  100% { transform: translate(28px, 0) rotate(0); border-color: rgba(200, 169, 122, 0.6); background: radial-gradient(circle, rgba(200,169,122,0.1) 0%, rgba(200,169,122,0.05) 100%); }
+}
+@keyframes coreIgnite { 0% { opacity: 0; } 100% { opacity: 1; } }
+@keyframes corePulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.9; } }
+@keyframes alignWave { 0% { width: 16px; height: 16px; opacity: 0.8; } 100% { width: 180px; height: 180px; opacity: 0; } }
 /* ── Screens ── */
 .screen {
   position: absolute; inset: 0; min-height: 100dvh;
@@ -326,7 +389,19 @@ body.light-ui #global-menu-btn:hover { color: rgba(0,0,0,0.6); }
 </style>
 </head>
 <body>
-
+<div id="loading-animation">
+  <div class="align-elements">
+    <div class="disk disk-1"></div>
+    <div class="disk disk-2"></div>
+    <div class="align-center">
+      <div class="align-pulse"></div>
+      <div class="core-dot"></div>
+    </div>
+  </div>
+  <div class="load-msg">
+    給情緒一點空間，<br class="desktop-br">給共識一個起點...
+  </div>
+</div>
 <div class="intent-anchor" id="global-intent">我希望<span id="anchor-text"></span></div>
 
 <button id="global-menu-btn" onclick="toggleMenu()">
@@ -555,6 +630,18 @@ body.light-ui #global-menu-btn:hover { color: rgba(0,0,0,0.6); }
 </div>
 
 <script>
+/* ── 🌟 載入動畫邏輯：模擬 5.5 秒的視覺對齊時間 ── */
+window.addEventListener('load', function() {
+  // 動畫期間鎖定螢幕防止亂滑
+  document.body.style.overflow = 'hidden'; 
+  
+  setTimeout(() => {
+    // 5.5秒後，隱藏載入畫面，並顯示主舞台
+    document.getElementById('loading-animation').classList.add('loaded');
+    document.getElementById('stage').classList.add('active');
+    document.body.style.overflow = 'auto'; // 解除鎖定
+  }, 5500); 
+});
 /* ── State Management ── */
 const app = { 
   pivotText: '', 
