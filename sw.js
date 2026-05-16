@@ -1,5 +1,5 @@
-// ⚡ 升級版本號至 v5，強制瀏覽器更新快取
-const CACHE = 'conflict-navigator-v5'; 
+// ⚡ 升級版本號至 v6，強制瀏覽器更新快取
+const CACHE = 'conflict-navigator-v6'; 
 
 // 🎯 精準對齊：將具體檔名改為 './'，避免因為本地檔名改變（如括號數字）導致快取失敗
 const ASSETS = [
