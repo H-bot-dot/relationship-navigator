@@ -423,8 +423,8 @@ body.light-ui #global-menu-btn:hover { color: rgba(0,0,0,0.6); }
     <div class="wall-wrap">
       <div class="wall-intent-quote">「我希望<span id="wall-intent-text"></span>」</div>
       <div class="wall-body">
-        <p style="margin-bottom: 1.5rem;">你的意圖很明確。<br class="desktop-br">但要將它傳遞過去，中間有一面由<span>「關係結構」</span>砌成的牆。</p>
-        <p>接下來的三個問題，不是要評斷對錯，<br class="desktop-br">而是要幫你客觀量測這面牆的<span>材質與厚度</span>。</p>
+        <p style="margin-bottom: 1.5rem;">你的意圖很明確<br class="desktop-br">但要將它傳遞過去，中間有一面由<span>「關係結構」</span>砌成的牆</p>
+        <p>接下來的三個問題不是要評斷對錯<br class="desktop-br">而是要幫你客觀量測這面牆的<span>材質與厚度</span></p>
       </div>
       <button class="action-btn-primary" style="max-width: 200px; margin: 0 auto;" onclick="startNavigator()">開始量測牆面</button>
     </div>
@@ -563,7 +563,7 @@ const CTX = {
 
 /* ── PRELUDE LOGIC ── */
 (function () {
-  const placeholders = ["正在煩什麼？", "讓它先出來。", "這裡很安全。", "沒有人在看。", "把沉重的一句話拋出來。"];
+  const placeholders = ["正在煩什麼？", "讓它先出來", "這裡很安全", "沒有人在看", "把沉重的話一句一句拋出來"];
   let cur = 0;
   const input = document.getElementById('void-input');
   setInterval(() => {
