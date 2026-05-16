@@ -157,6 +157,49 @@ html, body {
     opacity: 0; /* 在抵達最外圈時徹底消失，保證無殘影 */
   }
 }
+/* ── Screens ── */
+
+.screen {
+
+  position: absolute; inset: 0; min-height: 100dvh;
+
+  display: flex; flex-direction: column;
+
+  align-items: center; justify-content: center;
+
+  padding: 2rem 1.5rem;
+
+  opacity: 0; pointer-events: none; visibility: hidden;
+
+  transition: opacity .6s ease, visibility 0s .6s; 
+
+}
+
+.screen.active {
+
+  opacity: 1; pointer-events: all; visibility: visible;
+
+  transition: opacity .6s ease, visibility 0s 0s;
+
+}
+
+
+
+.screen.scrollable {
+
+  height: auto; min-height: 100%; justify-content: flex-start;
+
+  padding-top: 5rem; padding-bottom: 4rem;
+
+}
+
+.screen.scrollable:not(.active) {
+
+  height: 0; min-height: 0; padding-top: 0; padding-bottom: 0; overflow: hidden;
+
+  transition: opacity .6s ease, visibility 0s .6s, height 0s .6s, min-height 0s .6s, padding 0s .6s;
+
+}
 /* ─────────────────────────────────────────
    SCREEN 1 — THE VOID
 ───────────────────────────────────────── */
