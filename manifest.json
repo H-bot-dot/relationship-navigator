@@ -1,0 +1,27 @@
+{
+  "name": "Conflict Navigator",
+  "short_name": "衝突導航",
+  "description": "結合心理學與影響力策略的自我覺察工具，從宣洩情緒到找回關係的主導權",
+  "start_url": "./Navigate_v3.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0e0e10",
+  "theme_color": "#0e0e10",
+  "lang": "zh-TW",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "productivity"],
+  "screenshots": []
+}
