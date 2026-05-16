@@ -1,7 +1,7 @@
 {
-  "name": "Conflict Navigator",
+  "name": "Navigator",
   "short_name": "衝突導航",
-  "description": "結合心理學與影響力策略的自我覺察工具，從宣洩情緒到找回關係的主導權",
+  "description": "自我覺察工具，從宣洩情緒到找回關係的主導權",
   "start_url": "./Navigate_final.html",
   "display": "standalone",
   "orientation": "portrait",
