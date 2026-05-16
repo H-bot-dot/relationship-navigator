@@ -77,7 +77,6 @@ html, body {
   opacity: 1; visibility: visible;
 }
 #loading-animation.loaded { opacity: 0; visibility: hidden; }
-#loading-animation.loaded * { animation: none !important; opacity: 0 !important; }
 
 /* 幾何圓盤與共鳴波 */
 .align-elements { position: relative; width: 300px; height: 300px; display: flex; justify-content: center; align-items: center; margin-bottom: 40px;}
@@ -125,7 +124,7 @@ html, body {
 }
 @keyframes coreIgnite { 0% { opacity: 0; } 100% { opacity: 1; } }
 @keyframes corePulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.9; } }
-@keyframes alignWave { 0% { width: 16px; height: 16px; opacity: 0.8; } 85% { opacity: 0.15; } 100% { width: 180px; height: 180px; opacity: 0; visibility: hidden; } }
+@keyframes alignWave { 0% { width: 16px; height: 16px; opacity: 0.8; } 100% { width: 180px; height: 180px; opacity: 0; } }
 /* ── Screens ── */
 .screen {
   position: absolute; inset: 0; min-height: 100dvh;
@@ -652,10 +651,18 @@ window.addEventListener('load', function() {
   document.body.style.overflow = 'hidden'; 
   
   setTimeout(() => {
-    // 5.5秒後，隱藏載入畫面，並顯示主舞台
-    document.getElementById('loading-animation').classList.add('loaded');
-    document.getElementById('stage').classList.add('active');
-    document.body.style.overflow = 'auto'; // 解除鎖定
+    // 先停掉所有子動畫，防止 align-pulse 在淡出時凍結成實體圓環
+    const la = document.getElementById('loading-animation');
+    la.querySelectorAll('*').forEach(el => {
+      el.style.animation = 'none';
+      el.style.opacity   = '0';
+    });
+    // 下一幀再淡出整個 loading 畫面
+    requestAnimationFrame(() => {
+      la.classList.add('loaded');
+      document.getElementById('stage').classList.add('active');
+      document.body.style.overflow = 'auto';
+    });
   }, 5500); 
 });
 /* ── State Management ── */
