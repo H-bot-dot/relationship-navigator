@@ -1,12 +1,12 @@
-// ⚡ 升級版本號，強制瀏覽器更新快取
-const CACHE = 'conflict-navigator-v3'; 
+// ⚡ 升級版本號至 v4，強制瀏覽器更新快取
+const CACHE = 'conflict-navigator-v4'; 
 
-// 🎯 精準對齊你專案中的所有實體檔案
+// 🎯 精準對齊：將具體檔名改為 './'，避免因為本地檔名改變（如括號數字）導致快取失敗
 const ASSETS = [
-  './Navigate_final.html', // 修正：對齊 manifest 的 start_url
+  './',                  // 自動對齊根目錄（不論主檔名是 index 還是 Navigate_final）
   './manifest.json',
-  './chime.png',           // 修正：對齊實際的 PWA 圖示
-  './H-bot.png',           // 新增：快取創作者頭貼，確保離線選單完美顯示
+  './chime.png',           
+  './H-bot.png',           
   'https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600&family=DM+Sans:wght@300;400;500;600&display=swap',
 ];
 
@@ -14,13 +14,11 @@ const ASSETS = [
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE).then(cache => {
-      // Cache what we can; font CDN may fail offline — that's fine
       return Promise.allSettled(
         ASSETS.map(url => cache.add(url).catch(() => {}))
       );
     })
   );
-  // 強制立即生效
   self.skipWaiting();
 });
 
@@ -36,24 +34,20 @@ self.addEventListener('activate', e => {
 
 /* Fetch: cache-first, network fallback */
 self.addEventListener('fetch', e => {
-  // Only handle GET, skip cross-origin API calls
   if (e.request.method !== 'GET') return;
 
   e.respondWith(
     caches.match(e.request).then(cached => {
       if (cached) return cached;
       return fetch(e.request).then(response => {
-        // Cache successful same-origin responses
         if (response.ok && e.request.url.startsWith(self.location.origin)) {
           const clone = response.clone();
           caches.open(CACHE).then(cache => cache.put(e.request, clone));
         }
         return response;
       }).catch(() => {
-        // Offline fallback for navigation requests
         if (e.request.mode === 'navigate') {
-          // 修正：離線時正確導向 final 版 HTML
-          return caches.match('./Navigate_final.html'); 
+          return caches.match('./'); 
         }
       });
     })
