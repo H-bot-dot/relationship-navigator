@@ -102,104 +102,52 @@ html, body {
   background: #fff; box-shadow: 0 0 15px #ffcc80, 0 0 40px #ffcc80;
   animation: corePulse 1.5s infinite alternate;
 }
-/* ─────────────────────────────────────────
-   ⚡ LOADING ANIMATION: ALIGN (波紋 Bug 修正版)
-───────────────────────────────────────── */
-/* 圓環樣式優化：保持 1px 極細邊框，修正粗線與閃頻 */
 .align-pulse {
-  position: absolute; 
-  /* 必須使用絕對置中，讓寬高改變時能確保從正中心完美擴散 */
-  top: 50%; left: 50%; transform: translate(-50%, -50%);
-  border-radius: 50%;
-  border: 1px solid var(--accent-warm); /* 永遠保持 1px 的精緻感 */
-  opacity: 0; 
-  animation: alignWave 1.8s 2.5s infinite cubic-bezier(0.4, 0, 0.6, 1);
+  position: absolute; width: 16px; height: 16px; border-radius: 50%;
+  border: 1px solid var(--accent-warm); opacity: 0;
+  animation: alignWave 1.5s 2.5s infinite;
 }
+
 /* 載入文案（配合語意斷行） */
 .load-msg { text-align: center; color: rgba(255,255,255,0.4); font-family: var(--serif); font-size: 15px; font-weight: 300; line-height: 1.8; margin-bottom: 2rem; }
 .desktop-br { display: block; }
 @media (max-width: 600px) { .desktop-br { display: none; } }
-* 載入動畫關鍵影格 @keyframes */
 
+/* 載入動畫關鍵影格 @keyframes */
 @keyframes disksApproach1 {
-
   0% { transform: translate(-100px, -60px) rotate(-15deg); }
-
   100% { transform: translate(-28px, 0) rotate(0); border-color: rgba(200, 169, 122, 0.6); background: radial-gradient(circle, rgba(200,169,122,0.1) 0%, rgba(200,169,122,0.05) 100%); }
-
 }
-
 @keyframes disksApproach2 {
-
   0% { transform: translate(100px, 60px) rotate(15deg); }
-
   100% { transform: translate(28px, 0) rotate(0); border-color: rgba(200, 169, 122, 0.6); background: radial-gradient(circle, rgba(200,169,122,0.1) 0%, rgba(200,169,122,0.05) 100%); }
-
 }
-
 @keyframes coreIgnite { 0% { opacity: 0; } 100% { opacity: 1; } }
-
 @keyframes corePulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.9; } }
-/* 波紋關鍵影格：優雅淡入淡出，不使用 scale 避免邊框變粗 */
-@keyframes alignWave {
-  0% {
-    width: 16px; height: 16px;
-    opacity: 0;
-  }
-  10% {
-    opacity: 0.7; /* 快速亮起，解決閃頻 */
-  }
-  70% {
-    opacity: 0.2; /* 提早開始變暗 */
-  }
-  100% {
-    width: 180px; height: 180px;
-    opacity: 0; /* 在抵達最外圈時徹底消失，保證無殘影 */
-  }
-}
+@keyframes alignWave { 0% { width: 16px; height: 16px; opacity: 0.8; } 100% { width: 180px; height: 180px; opacity: 0; } }
 /* ── Screens ── */
-
 .screen {
-
   position: absolute; inset: 0; min-height: 100dvh;
-
   display: flex; flex-direction: column;
-
   align-items: center; justify-content: center;
-
   padding: 2rem 1.5rem;
-
   opacity: 0; pointer-events: none; visibility: hidden;
-
   transition: opacity .6s ease, visibility 0s .6s; 
-
 }
-
 .screen.active {
-
   opacity: 1; pointer-events: all; visibility: visible;
-
   transition: opacity .6s ease, visibility 0s 0s;
-
 }
-
-
 
 .screen.scrollable {
-
   height: auto; min-height: 100%; justify-content: flex-start;
-
   padding-top: 5rem; padding-bottom: 4rem;
-
 }
-
 .screen.scrollable:not(.active) {
-
   height: 0; min-height: 0; padding-top: 0; padding-bottom: 0; overflow: hidden;
-
   transition: opacity .6s ease, visibility 0s .6s, height 0s .6s, min-height 0s .6s, padding 0s .6s;
-
 }
+
 /* ─────────────────────────────────────────
    SCREEN 1 — THE VOID
 ───────────────────────────────────────── */
